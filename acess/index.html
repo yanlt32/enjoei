@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Entre na Enjoei para comprar e vender roupas, sapatos e bolsas! Baixe o app e confira!">
+    <title>Enjoei - Acessar Conta</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7fc;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Container principal */
+        .o-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 20px;
+            margin: 0 auto;
+        }
+
+        /* Cabeçalho */
+        .c-clean-header {
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .c-clean-header__wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .l-header-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .o-icon {
+            width: 24px;
+            height: 24px;
+            fill: #61005D;
+            transition: transform 0.3s ease;
+        }
+
+        .l-header-button:hover .o-icon {
+            transform: translateX(-5px);
+        }
+
+        .c-clean-header__link-logo {
+            display: block;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .o-logo svg {
+            width: 45px;
+            height: 45px;
+            fill: #61005D;
+            transition: transform 0.3s ease;
+        }
+
+        .c-clean-header__link-logo:hover .o-logo svg {
+            transform: scale(1.1);
+        }
+
+        /* Seção de Login */
+        .session-wrapper {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            transition: transform 0.3s ease;
+        }
+
+        .session-wrapper:hover {
+            transform: translateY(-5px);
+        }
+
+        .session-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .session-title {
+            font-size: clamp(24px, 6vw, 28px);
+            font-weight: 700;
+            color: #61005D;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .session-text {
+            font-size: clamp(14px, 4vw, 16px);
+            color: #666;
+            margin: 0;
+            line-height: 1.8;
+        }
+
+        /* Formulário */
+        .o-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .o-form__field {
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .l-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: clamp(14px, 3.5vw, 15px);
+            color: #333;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .o-input {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: #fafafa;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .o-input:focus {
+            border-color: #61005D;
+            box-shadow: 0 0 8px rgba(97, 0, 93, 0.2);
+            outline: none;
+        }
+
+        .checkbox-wrapper {
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .o-checkbox {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .o-checkbox__input {
+            margin-right: 10px;
+        }
+
+        .o-checkbox__blank {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #61005D;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        .o-checkbox__input:checked + .o-checkbox__blank {
+            background: #61005D;
+            position: relative;
+        }
+
+        .o-checkbox__input:checked + .o-checkbox__blank::after {
+            content: '✔';
+            color: #fff;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+        }
+
+        .o-button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #61005D, #8e2a7f);
+            color: #fff;
+            font-size: clamp(15px, 4vw, 17px);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(97, 0, 93, 0.3);
+        }
+
+        .o-button:hover {
+            background: linear-gradient(135deg, #4a0047, #6b205f);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(97, 0, 93, 0.4);
+        }
+
+        .o-button.-xs-link {
+            background: none;
+            color: #61005D;
+            box-shadow: none;
+            font-weight: 500;
+            text-align: center;
+            display: block;
+            margin-top: 15px;
+        }
+
+        .o-button.-xs-link:hover {
+            color: #8e2a7f;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .error-message {
+            color: #ff4d4d;
+            font-size: clamp(12px, 3vw, 13px);
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .separator {
+            display: block;
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .separator::before {
+            left: 0;
+        }
+
+        .separator::after {
+            right: 0;
+        }
+
+        /* Logo Banner */
+        .logo-banner {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeOutBanner 1.5s ease forwards;
+        }
+
+        .logo-banner svg {
+            width: 60px;
+            height: 60px;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeOutBanner {
+            0% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+
+        /* Flash Message */
+        .c-flash-message {
+            background: #ffcad4;
+            color: #333;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 600px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .session-wrapper {
+                margin: 20px;
+                padding: 24px;
+            }
+
+            .session-title {
+                font-size: clamp(20px, 5vw, 24px);
+            }
+
+            .session-text {
+                font-size: clamp(13px, 3.5vw, 14px);
+            }
+
+            .o-input,
+            .o-button {
+                padding: 12px;
+                font-size: clamp(13px, 3.5vw, 15px);
+            }
+
+            .c-clean-header {
+                padding: 10px 0;
+            }
+
+            .o-logo svg {
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+</head>
+<body class="is-v4 p-sessions-new" data-namespace="false" data-controller="sessions" data-action="new">
+    <!-- Logo Banner -->
+    <div class="logo-banner">
+    </div>
+
+    <!-- Flash Message -->
+    <div data-vue="flash-message">
+        <div class="c-flash-message" style="display: none;">
+            <div class="c-flash-message__content o-container">
+                <span class="c-flash-message__title"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cabeçalho -->
+    <header class="c-clean-header">
+        <div class="o-container -with-gutter t-hide-x-overflow">
+            <div class="c-clean-header__wrapper">
+                <div class="o-grid -xs-middle -xs-full">
+                    <div class="o-grid__item -xs-4">
+                    </div>
+                    <div class="o-grid__item -xs-16 t-text-center">
+                        <a class="c-clean-header__link-logo" href="index.html">
+                            <div class="o-logo -fill-none -type-icon -xs-size-small -style-color -enjoei">
+                                <svg viewBox="0 0 138 150" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill="#61005D" fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M 0 70.96875 C 0 29.25 27.914062 0 69.011719 0 C 110.113281 0 138.03125 29.25 137.972656 70.96875 C 137.972656 75.773438 137.804688 80.683594 137.25 84.710938 L 0.722656 84.710938 C 0.167969 80.679688 0 75.71875 0 70.972656 Z M 102.800781 59.988281 C 101.085938 38.242188 87.070312 29.25 69.011719 29.25 C 50.957031 29.25 36.941406 38.242188 35.226562 59.988281 Z M 34.339844 101.875 C 42.59375 114.128906 53.78125 120.695312 69.011719 120.695312 C 84.246094 120.695312 95.433594 114.128906 103.683594 101.875 L 129.773438 116.886719 C 116.921875 142.328125 92.496094 150 69.011719 150 C 45.527344 150 21.101562 142.328125 8.25 116.886719 L 34.34375 101.875 Z M 34.339844 101.875">
+                                    </path>
+                                </svg>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Seção de Login -->
+    <section data-vue="sessions-new-page">
+        <div class="o-container -with-gutter l-container">
+            <div class="session-wrapper">
+                <header class="session-header">
+                    <h1 class="session-title">Entrar no Enjoei</h1>
+                    <p class="session-text">A casa é sua, se aprochegue.</p>
+                </header>
+                <div class="l-wrapper">
+                    <form id="login_user" class="o-form l-form">
+                        <div class="o-form__field l-field">
+                            <label for="user_email" class="l-label">Email ou Telefone</label>
+                            <input data-test="input-email" type="text" name="user[email]" id="user_email"
+                                autocomplete="username" class="o-input -fill -xs-medium -md-large">
+                        </div>
+                        <div class="o-form__field l-field">
+                            <label for="user_password" class="l-label">Senha super secreta</label>
+                            <input data-test="input-password" type="password" name="user[password]"
+                                id="user_password" autocomplete="current-password" placeholder="Digite sua senha"
+                                class="o-input -fill -xs-medium -md-large">
+                        </div>
+                        <div class="checkbox-wrapper">
+                            <label class="o-checkbox t-lowercase -xs-medium">
+                                <input type="checkbox" id="checkbox-b71e8023" name="user[remember_me]" value="1"
+                                    class="o-checkbox__input">
+                                <span class="o-checkbox__blank"></span>
+                                <span>Continuar conectado</span>
+                            </label>
+                        </div>
+                        <button data-test="button-login-entrar" type="button"
+                            class="o-button -xs-flat -xs-large -xs-fill t-lowercase -xs-primary"
+                            aria-label="Entrar na conta" onclick="redirectUser()">Entrar</button>
+                        <div class="error-message" id="error-message"></div>
+                    </form>
+                    <div>
+                        <a href="https://www.enjoei.com.br/esqueci-minha-senha"
+                            class="o-button -xs-link -xs-large -xs-fill t-lowercase">Esqueci a senha</a>
+                    </div>
+                    <div>
+                        <span class="separator">ou</span>
+                        <p class="o-text -xs-minion -xs-regular -xs-center">
+                            Protegido por reCAPTCHA -
+                            <a href="https://www.enjoei.com.br/privacidade" target="_blank">privacidade</a> -
+                            <a href="https://www.enjoei.com.br/termos" target="_blank">condições</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script>
+        function resolveBackAction() {
+            window.history.back();
+        }
+
+        function redirectUser() {
+            window.location.href = "/very/index.html";
+        }
+
+        // Remove logo banner após 1.5s
+        window.onload = function() {
+            setTimeout(() => {
+                document.querySelector('.logo-banner').style.display = 'none';
+            }, 1500);
+        };
+    </script>
+</body>
+</html>

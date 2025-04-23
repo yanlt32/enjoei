@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Confirme o pagamento da taxa de liberação enviando o comprovante na Enjoei.">
+    <title>Enjoei - Confirmação de Pagamento</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7fc;
+            color: #333;
+            line-height: 1.6;
+            min-width: 320px;
+            overflow-x: hidden;
+        }
+
+        /* Container principal */
+        .o-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 20px;
+            margin: 0 auto;
+        }
+
+        /* Seção de confirmação */
+        .session-wrapper {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+            transition: transform 0.3s ease;
+        }
+
+        .session-wrapper:hover {
+            transform: translateY(-5px);
+        }
+
+        .session-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .session-title {
+            font-size: clamp(24px, 6vw, 28px);
+            font-weight: 700;
+            color: #61005D;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .session-text {
+            font-size: clamp(14px, 4vw, 16px);
+            color: #666;
+            margin: 0;
+            line-height: 1.8;
+        }
+
+        /* Formulário */
+        .l-form {
+            margin-top: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .o-form__field {
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .l-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: clamp(14px, 3.5vw, 15px);
+            color: #333;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Estilo personalizado para o input de arquivo */
+        .custom-file-input {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ffcad4, #ffdde1);
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-size: clamp(14px, 3.5vw, 16px);
+            font-weight: 500;
+            color: #61005D;
+        }
+
+        .custom-file-input:hover {
+            background: linear-gradient(135deg, #ffb6c1, #ffcdd2);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .custom-file-input input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .custom-file-input i {
+            font-size: 18px;
+        }
+
+        /* Preview da imagem */
+        .image-preview-container {
+            margin-top: 20px;
+            width: 100%;
+            display: none;
+            text-align: center;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: block;
+            margin: 0 auto;
+            transition: transform 0.3s ease;
+        }
+
+        .image-preview:hover {
+            transform: scale(1.02);
+        }
+
+        .remove-image {
+            display: block;
+            text-align: center;
+            margin-top: 12px;
+            color: #ff4d4d;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .remove-image:hover {
+            color: #e63939;
+        }
+
+        /* Botão de confirmação */
+        .confirm-button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #61005D, #8e2a7f);
+            color: #fff;
+            font-size: clamp(15px, 4vw, 17px);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(97, 0, 93, 0.3);
+        }
+
+        .confirm-button:hover {
+            background: linear-gradient(135deg, #4a0047, #6b205f);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(97, 0, 93, 0.4);
+        }
+
+        /* Mensagens de erro */
+        .mensagem-erro {
+            color: #ff4d4d;
+            font-size: clamp(12px, 3vw, 13px);
+            margin-top: 8px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .mensagem-erro.show {
+            display: block;
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .session-wrapper {
+                margin: 20px;
+                padding: 24px;
+            }
+
+            .session-title {
+                font-size: clamp(20px, 5vw, 24px);
+            }
+
+            .session-text {
+                font-size: clamp(13px, 3.5vw, 14px);
+            }
+
+            .image-preview {
+                max-height: 250px;
+            }
+
+            .custom-file-input,
+            .confirm-button {
+                padding: 14px;
+                font-size: clamp(13px, 3.5vw, 15px);
+            }
+        }
+
+        @media (max-width: 360px) {
+            .session-wrapper {
+                padding: 16px;
+                margin: 15px;
+            }
+
+            .image-preview {
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section data-vue="sessions-new-page">
+        <div class="o-container -with-gutter l-container">
+            <div class="session-wrapper">
+                <header class="session-header">
+                    <h1 class="session-title">Confirmação de Pagamento</h1>
+                    <p class="session-text">
+                        Após confirmar, em instantes você receberá o valor em sua conta!
+                    </p>
+                </header>
+                <div class="l-wrapper">
+                    <form action="#" method="post" accept-charset="utf-8" id="login_user" novalidate="novalidate" class="o-form l-form" onsubmit="submitForm(event)">
+                        <div class="o-form__field l-field">
+                            <label for="user_files" class="l-label">Envie o comprovante de Pagamento *</label>
+                            <label class="custom-file-input" aria-label="Enviar comprovante de pagamento">
+                                <i class="fa fa-paperclip"></i> Enviar comprovante
+                                <input type="file" name="user_files[]" id="user_files" accept=".pdf, .jpg, .jpeg, .png" required multiple>
+                            </label>
+                            <div class="image-preview-container" id="imagePreviewContainer">
+                                <img src="#" alt="Pré-visualização do comprovante" class="image-preview" id="imagePreview">
+                                <span class="remove-image" onclick="removeImage()">Remover imagem</span>
+                            </div>
+                            <div id="erro-user_name" class="mensagem-erro"></div>
+                        </div>
+                        <div class="o-well">
+                            <div id="mensagem-erro" class="mensagem-erro"></div>
+                            <button type="submit" class="confirm-button" aria-label="Confirmar pagamento">
+                                Confirmar Pagamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <script>
+        // Função para exibir pré-visualização da imagem
+        document.getElementById('user_files').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const mensagemErro = document.getElementById('mensagem-erro');
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const preview = document.getElementById('imagePreview');
+
+            // Limpa mensagens de erro anteriores
+            mensagemErro.textContent = '';
+            mensagemErro.classList.remove('show');
+
+            // Verifica se um arquivo foi selecionado
+            if (file) {
+                // Verifica se é uma imagem
+                if (file.type.match('image.*')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+                // Verifica se é PDF
+                else if (file.type === 'application/pdf') {
+                    preview.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjNjEwMDVEIiBkPSJNNDE2IDIyNEgyODhWNjRoMTI4djE2MHptMzIgMzJIMzIwVjI1NmgxMjh2LTMyem0tMzIwLTMyaDEyOHYzMkgxMjh2LTMyem0zMi0zMkgxNjB2MTYwaDEyOHYtMTYwem0tMTYwIDk2SDEyOHYzMmgzMnYtMzJ6bTk2IDBoLTY0djMyaDY0di0zMnptMTYwIDBoLTY0djMyaDY0di0zMnptMTYwIDBoLTY0djMyaDY0di0zMnptLTQxNi0zMmgxMjh2MzJIMTI4di0zMnptMzIgMzJIMTYwdjMySDI4OHYtMzJIMTYwem0zMi0zMkgyODh2MzJoMTI4di0zMkgzMjB6TTQ0OCAzMkg2NEM0Ni40IDMyIDMyIDQ2LjQgMzIgNjR2Mzg0YzAgMTcuNiAxNC40IDMyIDMyIDMyaDM4NGMxNy42IDAgMzItMTQuNCAzMi0zMlY2NGMwLTE3LjYtMTQuNC0zMi0zMi0zMnpNMTYwIDQ0OGgtMzJWMTI4aDMydjMyMHptMzIgMGgzMnYtMzJoNjR2MzJoMzJ2LTMyMGgtMTI4djMyMHptMTI4IDBoNjR2LTMySDMyMHYzMnoiLz48L3N2Zz4=';
+                    previewContainer.style.display = 'block';
+                }
+                else {
+                    mensagemErro.textContent = 'Formato de arquivo não suportado. Envie uma imagem ou PDF.';
+                    mensagemErro.classList.add('show');
+                    e.target.value = '';
+                }
+            }
+        });
+
+        // Função para remover a imagem
+        function removeImage() {
+            document.getElementById('user_files').value = '';
+            document.getElementById('imagePreviewContainer').style.display = 'none';
+            document.getElementById('mensagem-erro').textContent = '';
+            document.getElementById('mensagem-erro').classList.remove('show');
+        }
+
+        // Função para enviar o formulário
+        async function submitForm(event) {
+            event.preventDefault();
+            const files = document.getElementById('user_files').files;
+            const mensagemErro = document.getElementById('mensagem-erro');
+
+            if (files.length === 0) {
+                mensagemErro.textContent = 'Por favor, envie pelo menos um arquivo.';
+                mensagemErro.classList.add('show');
+                return;
+            }
+
+            // Simulação de envio
+            alert('Comprovante enviado com sucesso!');
+            window.location.href = '/confirm/index.html';
+        }
+
+        // Função de confirmação redundante (removida do botão, mantida por compatibilidade)
+        function confirmarPagamento() {
+            window.location.href = '/confirm/index.html';
+        }
+    </script>
+</body>
+</html>
