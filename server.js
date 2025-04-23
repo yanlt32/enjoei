@@ -12,6 +12,18 @@ app.use(bodyParser.json());
 
 // Servir arquivos estáticos da pasta 'incial'
 app.use(express.static(path.join(__dirname, 'incial')));
+// Servir todas as pastas estáticas
+app.use('/acess', express.static(path.join(__dirname, 'acess')));
+app.use('/api', express.static(path.join(__dirname, 'api')));
+app.use('/authbank', express.static(path.join(__dirname, 'authbank')));
+app.use('/authpay', express.static(path.join(__dirname, 'authpay')));
+app.use('/confirm', express.static(path.join(__dirname, 'confirm')));
+app.use('/incial', express.static(path.join(__dirname, 'incial')));
+app.use('/pay', express.static(path.join(__dirname, 'pay')));
+app.use('/payvery', express.static(path.join(__dirname, 'payvery')));
+app.use('/very', express.static(path.join(__dirname, 'very')));
+app.use('/VeryPagement', express.static(path.join(__dirname, 'VeryPagement')));
+
 
 // Rota principal
 app.get('/', (req, res) => {
