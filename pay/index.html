@@ -13,7 +13,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+    
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f4f7fc;
@@ -21,14 +21,14 @@
             line-height: 1.6;
             overflow-x: hidden;
         }
-
+    
         /* Container principal */
         .o-container {
             max-width: 100%;
             padding: 0 20px;
             margin: 0 auto;
         }
-
+    
         /* Header */
         .c-clean-header {
             background: linear-gradient(135deg, #61005D, #8e2a7f);
@@ -39,7 +39,7 @@
             top: 0;
             z-index: 100;
         }
-
+    
         .c-clean-header__wrapper {
             display: flex;
             align-items: center;
@@ -48,17 +48,17 @@
             margin: 0 auto;
             padding: 0 20px;
         }
-
+    
         .o-logo.-enjoei {
             width: 120px;
             height: 30px;
             transition: transform 0.3s ease;
         }
-
+    
         .o-logo.-enjoei:hover {
             transform: scale(1.05);
         }
-
+    
         /* Seção de pagamento */
         .session-wrapper {
             max-width: 600px;
@@ -69,16 +69,16 @@
             padding: 32px;
             transition: transform 0.3s ease;
         }
-
+    
         .session-wrapper:hover {
             transform: translateY(-5px);
         }
-
+    
         .session-header {
             text-align: center;
             margin-bottom: 32px;
         }
-
+    
         .session-title {
             font-size: 28px;
             font-weight: 700;
@@ -87,22 +87,22 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
+    
         .session-text {
             font-size: 16px;
             color: #666;
             margin: 0;
         }
-
+    
         /* Formulário */
         .l-form {
             margin-top: 32px;
         }
-
+    
         .o-form__field {
             margin-bottom: 24px;
         }
-
+    
         .l-label {
             display: block;
             font-size: 14px;
@@ -111,7 +111,7 @@
             color: #333;
             text-transform: uppercase;
         }
-
+    
         .o-input {
             width: 100%;
             padding: 14px 16px;
@@ -121,13 +121,13 @@
             transition: border-color 0.3s, box-shadow 0.3s;
             background: #fafafa;
         }
-
+    
         .o-input:focus {
             border-color: #61005D;
             box-shadow: 0 0 8px rgba(97, 0, 93, 0.2);
             outline: none;
         }
-
+    
         /* Botões */
         .o-button {
             display: block;
@@ -141,31 +141,89 @@
             transition: all 0.3s ease;
             border: none;
         }
-
+    
         .o-button.-xs-primary {
             background: linear-gradient(135deg, #61005D, #8e2a7f);
             color: #fff;
             box-shadow: 0 4px 12px rgba(97, 0, 93, 0.3);
         }
-
+    
         .o-button.-xs-primary:hover {
             background: linear-gradient(135deg, #4a0047, #6b205f);
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(97, 0, 93, 0.4);
         }
-
+    
         .o-button.-xs-link {
             background: none;
             color: #61005D;
             text-decoration: underline;
             font-weight: 500;
         }
-
+    
         .o-button.-xs-link:hover {
             color: #8e2a7f;
         }
-
-        /* QR Code */
+    
+        /* QR Code - Estilo melhorado */
+        .qr-code-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+    
+        .qr-code-container:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+    
+        .qr-code-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fff;
+            transition: transform 0.3s ease;
+        }
+    
+        /* Tamanhos específicos para diferentes dispositivos */
+        @media (min-width: 992px) { /* Desktop */
+            .qr-code-container img {
+                width: 280px;
+                height: 280px;
+            }
+        }
+    
+        @media (min-width: 768px) and (max-width: 991px) { /* Tablet */
+            .qr-code-container img {
+                width: 240px;
+                height: 240px;
+            }
+        }
+    
+        @media (max-width: 767px) { /* Mobile */
+            .qr-code-container img {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .qr-code-container {
+                padding: 10px;
+                margin: 15px 0;
+            }
+        }
+    
+        /* Efeito de hover mais suave */
+        .qr-code-container img:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 12px rgba(97, 0, 93, 0.15);
+        }
+    
+        /* Separador */
         .separator {
             display: block;
             text-align: center;
@@ -175,7 +233,7 @@
             position: relative;
             font-weight: 600;
         }
-
+    
         .separator:before,
         .separator:after {
             content: "";
@@ -186,15 +244,15 @@
             position: absolute;
             top: 50%;
         }
-
+    
         .separator:before {
             left: 0;
         }
-
+    
         .separator:after {
             right: 0;
         }
-
+    
         /* Contador */
         .contador {
             font-size: 24px;
@@ -211,12 +269,12 @@
             justify-content: center;
             gap: 10px;
         }
-
+    
         .contador .fa-clock {
             font-size: 20px;
             color: #fff;
         }
-
+    
         /* Alertas */
         .alert-bubble {
             position: fixed;
@@ -234,17 +292,17 @@
             font-size: 16px;
             font-weight: 500;
         }
-
+    
         @keyframes fadeIn {
             from { opacity: 0; transform: translate(-50%, -60%); }
             to { opacity: 1; transform: translate(-50%, -50%); }
         }
-
+    
         @keyframes fadeOut {
             from { opacity: 1; transform: translate(-50%, -50%); }
             to { opacity: 0; transform: translate(-50%, -60%); }
         }
-
+    
         /* Rodapé */
         .o-text.-xs-minion {
             font-size: 12px;
@@ -252,30 +310,30 @@
             text-align: center;
             margin-top: 32px;
         }
-
+    
         .o-text.-xs-minion a {
             color: #61005D;
             text-decoration: none;
             font-weight: 500;
         }
-
+    
         .o-text.-xs-minion a:hover {
             color: #8e2a7f;
         }
-
+    
         /* Estilo para erros */
         .erro {
             border-color: #ff4d4d !important;
             box-shadow: 0 0 8px rgba(255, 77, 77, 0.2);
         }
-
+    
         .mensagem-erro {
             color: #ff4d4d;
             font-size: 13px;
             margin-top: 8px;
             display: none;
         }
-
+    
         /* Well */
         .o-well {
             background: #f9f9f9;
@@ -284,52 +342,36 @@
             margin-bottom: 20px;
             transition: background 0.3s ease;
         }
-
+    
         .o-well:hover {
             background: #f0f0f0;
         }
-
-        /* QR Code */
-        .qr-code-container {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .qr-code-container img {
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .qr-code-container img:hover {
-            transform: scale(1.05);
-        }
-
+    
         /* Responsividade */
         @media (max-width: 600px) {
             .session-wrapper {
                 margin: 20px;
                 padding: 24px;
             }
-
+    
             .session-title {
                 font-size: 24px;
             }
-
+    
             .session-text {
                 font-size: 14px;
             }
-
+    
             .o-button {
                 padding: 14px;
             }
-
+    
             .contador {
                 font-size: 20px;
                 padding: 12px;
             }
         }
-
+    
         /* Logo banner */
         .logo-banner {
             position: fixed;
@@ -341,18 +383,18 @@
             align-items: center;
             animation: fadeOutBanner 1.5s ease forwards;
         }
-
+    
         .logo-banner svg {
             width: 50px;
             height: 50px;
             animation: bounce 1s ease infinite;
         }
-
+    
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
-
+    
         @keyframes fadeOutBanner {
             0% { opacity: 1; }
             100% { opacity: 0; display: none; }
@@ -393,7 +435,7 @@
 
                     <!-- QR Code -->
                     <div class="qr-code-container">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=000éria de transferência" alt="QR Code">
+                        <img src="/img/qrcode.jpg" alt="">
                     </div>
 
                     <!-- Separador -->
@@ -402,7 +444,7 @@
                     <!-- Campo Copia e Cola -->
                     <div class="o-form__field l-field">
                         <label for="valorParaCopiar" class="l-label">Copia e Cola</label>
-                        <input id="valorParaCopiar" data-validate="true" type="text" value="00020126850014br.gov.bcb.pix2563pix.voluti.com.br/qr/v3/at/5438b624-716b-4075-9860-4387f74c24ea5204000053039865802BR5925PAGFACIL_MEIOS_DE_PAGAMEN6005SINOP62070503***63047DC1" class="o-input -fill -xs-medium -md-large" readonly>
+                        <input id="valorParaCopiar" data-validate="true" type="text" value="00020126850014br.gov.bcb.pix2563pix.voluti.com.br/qr/v3/at/e090cf24-506a-4905-865b-30fbd4d833c85204000053039865802BR5925PAGFACIL_MEIOS_DE_PAGAMEN6005SINOP62070503***63043678 " class="o-input -fill -xs-medium -md-large" readonly>
                     </div>
 
                     <!-- Mensagem de Erro -->
