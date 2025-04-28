@@ -11,7 +11,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Servir arquivos estáticos da pasta 'incial'
-app.use(express.static(path.join(__dirname, 'incial')));
+app.use(express.static(path.join(__dirname, 'inicial')));
 
 // Servir todas as pastas estáticas
 app.use('/acess', express.static(path.join(__dirname, 'acesso')));
