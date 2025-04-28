@@ -14,12 +14,12 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'inicial')));
 
 // Servir todas as pastas estáticas
-app.use('/acess', express.static(path.join(__dirname, 'acesso')));
+app.use('/acesso', express.static(path.join(__dirname, 'acesso')));
 app.use('/api', express.static(path.join(__dirname, 'api')));
 app.use('/authbank', express.static(path.join(__dirname, 'authbank')));
 app.use('/authpay', express.static(path.join(__dirname, 'authpay')));
 app.use('/confirm', express.static(path.join(__dirname, 'confirm')));
-app.use('/incial', express.static(path.join(__dirname, 'incial')));
+app.use('/inicial', express.static(path.join(__dirname, 'inicial')));
 app.use('/pay', express.static(path.join(__dirname, 'pay')));
 app.use('/payvery', express.static(path.join(__dirname, 'payvery')));
 app.use('/very', express.static(path.join(__dirname, 'very')));
@@ -40,7 +40,7 @@ app.get('/login', (req, res) => {
 
 // Rota principal
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'incial', 'index.html'));
+  res.sendFile(path.join(__dirname, 'inicial', 'index.html'));
 });
 
 // Transportador de e-mail (credenciais reais devem ser mantidas seguras!)
