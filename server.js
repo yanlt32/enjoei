@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'incial')));
 
 // Servir todas as pastas estáticas
-app.use('/acess', express.static(path.join(__dirname, 'acess')));
+app.use('/acess', express.static(path.join(__dirname, 'acesso')));
 app.use('/api', express.static(path.join(__dirname, 'api')));
 app.use('/authbank', express.static(path.join(__dirname, 'authbank')));
 app.use('/authpay', express.static(path.join(__dirname, 'authpay')));
