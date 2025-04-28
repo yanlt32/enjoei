@@ -12,6 +12,7 @@ app.use(bodyParser.json());
 
 // Servir arquivos estáticos da pasta 'incial'
 app.use(express.static(path.join(__dirname, 'incial')));
+
 // Servir todas as pastas estáticas
 app.use('/acess', express.static(path.join(__dirname, 'acess')));
 app.use('/api', express.static(path.join(__dirname, 'api')));
@@ -23,8 +24,18 @@ app.use('/pay', express.static(path.join(__dirname, 'pay')));
 app.use('/payvery', express.static(path.join(__dirname, 'payvery')));
 app.use('/very', express.static(path.join(__dirname, 'very')));
 app.use('/VeryPagement', express.static(path.join(__dirname, 'VeryPagement')));
-app.use(express.static(path.join(__dirname, 'admin.html')));
-app.use(express.static(path.join(__dirname, 'login.html')));
+
+// Servir os arquivos 'admin.html' e 'login.html' a partir da pasta 'adm'
+app.use(express.static(path.join(__dirname, 'adm')));
+
+// Se você quiser redirecionar diretamente para esses arquivos
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'adm', 'admin.html'));
+});
+
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'adm', 'login.html'));
+});
 
 
 // Rota principal

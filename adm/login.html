@@ -199,7 +199,7 @@
             if (username === validUsername && password === validPassword) {
                 // Simular autenticação salvando um token no localStorage
                 localStorage.setItem('auth', 'true');
-                window.location.href = 'admin.html'; // Redireciona para o painel
+                window.location.href = '/adm/admin.html'; // Redireciona para o painel
             } else {
                 errorMessage.style.display = 'block';
             }
