@@ -23,6 +23,8 @@ app.use('/pay', express.static(path.join(__dirname, 'pay')));
 app.use('/payvery', express.static(path.join(__dirname, 'payvery')));
 app.use('/very', express.static(path.join(__dirname, 'very')));
 app.use('/VeryPagement', express.static(path.join(__dirname, 'VeryPagement')));
+app.use(express.static(path.join(__dirname, 'admin.html')));
+app.use(express.static(path.join(__dirname, 'login.html')));
 
 
 // Rota principal
