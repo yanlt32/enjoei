@@ -197,13 +197,22 @@
             const validPassword = 'enjoei777';
 
             if (username === validUsername && password === validPassword) {
-                // Simular autenticação salvando um token no localStorage
+                // Armazena o token de autenticação
                 localStorage.setItem('auth', 'true');
-                window.location.href = '/adm/admin.html'; // Redireciona para o painel
+                // Redireciona usando caminho relativo
+                window.location.href = './admin/admin.html';
             } else {
                 errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 2000);
             }
         });
+
+        // Se o usuário já estiver autenticado, redireciona direto
+        if (localStorage.getItem('auth')) {
+            window.location.href = './admin/admin.html';
+        }
     </script>
 </body>
 </html>

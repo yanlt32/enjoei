@@ -649,6 +649,13 @@ body {
     </style>
 </head>
 <body>
+    <!-- Verificação de autenticação -->
+    <script>
+        if (!localStorage.getItem('auth')) {
+            window.location.href = '../login.html';
+        }
+    </script>
+    
     <header class="admin-header">
         <div class="header-content">
             <h1 class="admin-title">Painel Administrativo</h1>
@@ -696,7 +703,7 @@ body {
                         <label for="qr-code-image">QR Code</label>
                         <input type="file" id="qr-code-image" class="form-control" accept="image/*">
                         <div class="qr-preview">
-                            <img id="qr-preview" src="/img/qrcode.jpg" alt="QR Code Atual">
+                            <img id="qr-preview" src="../img/qrcode.jpg" alt="QR Code Atual">
                         </div>
                     </div>
                     
@@ -746,7 +753,7 @@ body {
     <script>
         // Dados iniciais
         let paymentSettings = {
-            qrCode: "/img/qrcode.jpg",
+            qrCode: "../img/qrcode.jpg",
             pixCopyPaste: "00020126850014br.gov.bcb.pix2563pix.voluti.com.br/qr/v3/at/e090cf24-506a-4905-865b-30fbd4d833c85204000053039865802BR5925PAGFACIL_MEIOS_DE_PAGAMEN6005SINOP62070503***63043678"
         };
 
@@ -754,6 +761,12 @@ body {
 
         // Carregar dados ao iniciar
         document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autenticação novamente para garantir
+            if (!localStorage.getItem('auth')) {
+                window.location.href = '../login.html';
+                return;
+            }
+
             loadPaymentSettings();
             loadClientData();
             updateStats();
@@ -814,190 +827,219 @@ body {
         }
 
         // Atualizar estatísticas
-function updateStats() {
-    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-    
-    const ativos = clientes.filter(c => c.status === 'ativo').length;
-    const inativos = clientes.filter(c => c.status === 'inativo').length;
-    const pagamentosHoje = clientes.filter(c => {
-        const hoje = new Date().toISOString().split('T')[0];
-        return c.ultimoPagamento && c.ultimoPagamento.includes(hoje);
-    }).length;
+        function updateStats() {
+            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+            
+            const ativos = clientes.filter(c => c.status === 'ativo').length;
+            const inativos = clientes.filter(c => c.status === 'inativo').length;
+            const pagamentosHoje = clientes.filter(c => {
+                const hoje = new Date().toISOString().split('T')[0];
+                return c.ultimoPagamento && c.ultimoPagamento.includes(hoje);
+            }).length;
 
-    document.getElementById('clientes-ativos').textContent = ativos;
-    document.getElementById('clientes-inativos').textContent = inativos;
-    document.getElementById('pagamentos-hoje').textContent = pagamentosHoje;
+            document.getElementById('clientes-ativos').textContent = ativos;
+            document.getElementById('clientes-inativos').textContent = inativos;
+            document.getElementById('pagamentos-hoje').textContent = pagamentosHoje;
 
-    // Atualizar gráfico
-    if (clientesChart) {
-        clientesChart.data.datasets[0].data = [
-            ativos,
-            inativos,
-            clientes.filter(c => c.status === 'pendente').length
-        ];
-        clientesChart.update();
-    }
-}
+            // Atualizar gráfico
+            if (clientesChart) {
+                clientesChart.data.datasets[0].data = [
+                    ativos,
+                    inativos,
+                    clientes.filter(c => c.status === 'pendente').length
+                ];
+                clientesChart.update();
+            }
+        }
 
-// Carregar configurações de pagamento
-function loadPaymentSettings() {
-    document.getElementById('qr-preview').src = paymentSettings.qrCode;
-    document.getElementById('pix-copy-paste').value = paymentSettings.pixCopyPaste;
-}
+        // Carregar configurações de pagamento
+        function loadPaymentSettings() {
+            const savedSettings = JSON.parse(localStorage.getItem('paymentSettings'));
+            if (savedSettings) {
+                paymentSettings = savedSettings;
+            }
+            document.getElementById('qr-preview').src = paymentSettings.qrCode;
+            document.getElementById('pix-copy-paste').value = paymentSettings.pixCopyPaste;
+        }
 
-// Salvar configurações de pagamento
-function savePaymentSettings() {
-    const qrInput = document.getElementById('qr-code-image');
-    const pixCopyPaste = document.getElementById('pix-copy-paste').value;
+        // Salvar configurações de pagamento
+        function savePaymentSettings() {
+            const qrInput = document.getElementById('qr-code-image');
+            const pixCopyPaste = document.getElementById('pix-copy-paste').value;
 
-    // Atualizar configurações
-    paymentSettings.pixCopyPaste = pixCopyPaste;
+            // Atualizar configurações
+            paymentSettings.pixCopyPaste = pixCopyPaste;
 
-    if (qrInput.files && qrInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            paymentSettings.qrCode = event.target.result;
-            document.getElementById('qr-preview').src = event.target.result;
-            localStorage.setItem('paymentSettings', JSON.stringify(paymentSettings));
-            alert('Configurações salvas com sucesso!');
-        };
-        reader.readAsDataURL(qrInput.files[0]);
-    } else {
-        localStorage.setItem('paymentSettings', JSON.stringify(paymentSettings));
-        alert('Configurações salvas com sucesso!');
-    }
-}
+            if (qrInput.files && qrInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    paymentSettings.qrCode = event.target.result;
+                    document.getElementById('qr-preview').src = event.target.result;
+                    localStorage.setItem('paymentSettings', JSON.stringify(paymentSettings));
+                    alert('Configurações salvas com sucesso!');
+                };
+                reader.readAsDataURL(qrInput.files[0]);
+            } else {
+                localStorage.setItem('paymentSettings', JSON.stringify(paymentSettings));
+                alert('Configurações salvas com sucesso!');
+            }
+        }
 
-// Carregar dados dos clientes
-function loadClientData() {
-    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-    const tbody = document.getElementById('clientes-table-body');
-    tbody.innerHTML = '';
+        // Carregar dados dos clientes
+        function loadClientData() {
+            // Se não existir dados, cria alguns exemplos
+            if (!localStorage.getItem('clientes')) {
+                const clientesExemplo = [
+                    {
+                        id: 1,
+                        nome: "João Silva",
+                        cpf: "123.456.789-00",
+                        telefone: "(11) 99999-9999",
+                        chavePix: "joao@email.com",
+                        status: "ativo",
+                        ultimoPagamento: new Date().toISOString().split('T')[0]
+                    },
+                    {
+                        id: 2,
+                        nome: "Maria Souza",
+                        cpf: "987.654.321-00",
+                        telefone: "(11) 88888-8888",
+                        chavePix: "(11) 88888-8888",
+                        status: "pendente"
+                    }
+                ];
+                localStorage.setItem('clientes', JSON.stringify(clientesExemplo));
+            }
 
-    clientes.forEach(cliente => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${cliente.id}</td>
-            <td>${cliente.nome}</td>
-            <td>${cliente.cpf}</td>
-            <td>${cliente.telefone}</td>
-            <td>${cliente.chavePix}</td>
-            <td><span class="badge badge-${
-                cliente.status === 'ativo' ? 'success' : 
-                cliente.status === 'inativo' ? 'danger' : 'warning'
-            }">${cliente.status.charAt(0).toUpperCase() + cliente.status.slice(1)}</span></td>
-            <td>
-                <button class="action-btn view-btn" onclick="viewClient(${cliente.id})">Ver</button>
-                <button class="action-btn edit-btn" onclick="editClient(${cliente.id})">Editar</button>
-                <button class="action-btn delete-btn" onclick="deleteClient(${cliente.id})">Excluir</button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
+            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+            const tbody = document.getElementById('clientes-table-body');
+            tbody.innerHTML = '';
 
-// Visualizar cliente
-function viewClient(id) {
-    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-    const cliente = clientes.find(c => c.id === id);
-    if (!cliente) return;
+            clientes.forEach(cliente => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${cliente.id}</td>
+                    <td>${cliente.nome}</td>
+                    <td>${cliente.cpf}</td>
+                    <td>${cliente.telefone}</td>
+                    <td>${cliente.chavePix}</td>
+                    <td><span class="badge badge-${
+                        cliente.status === 'ativo' ? 'success' : 
+                        cliente.status === 'inativo' ? 'danger' : 'warning'
+                    }">${cliente.status.charAt(0).toUpperCase() + cliente.status.slice(1)}</span></td>
+                    <td>
+                        <button class="action-btn view-btn" onclick="viewClient(${cliente.id})">Ver</button>
+                        <button class="action-btn edit-btn" onclick="editClient(${cliente.id})">Editar</button>
+                        <button class="action-btn delete-btn" onclick="deleteClient(${cliente.id})">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
 
-    const modalContent = document.getElementById('modal-client-content');
-    modalContent.innerHTML = `
-        <p><strong>Nome:</strong> ${cliente.nome}</p>
-        <p><strong>CPF:</strong> ${cliente.cpf}</p>
-        <p><strong>Telefone:</strong> ${cliente.telefone}</p>
-        <p><strong>Chave PIX:</strong> ${cliente.chavePix}</p>
-        <p><strong>Status:</strong> ${cliente.status}</p>
-    `;
-    document.getElementById('modal-client-content').previousElementSibling.textContent = 'Visualizar Cliente';
-    document.getElementById('client-modal').style.display = 'flex';
-}
+        // Visualizar cliente
+        function viewClient(id) {
+            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+            const cliente = clientes.find(c => c.id === id);
+            if (!cliente) return;
 
-// Editar cliente
-function editClient(id) {
-    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-    const cliente = clientes.find(c => c.id === id);
-    if (!cliente) return;
+            const modalContent = document.getElementById('modal-client-content');
+            modalContent.innerHTML = `
+                <p><strong>Nome:</strong> ${cliente.nome}</p>
+                <p><strong>CPF:</strong> ${cliente.cpf}</p>
+                <p><strong>Telefone:</strong> ${cliente.telefone}</p>
+                <p><strong>Chave PIX:</strong> ${cliente.chavePix}</p>
+                <p><strong>Status:</strong> ${cliente.status}</p>
+                ${cliente.ultimoPagamento ? `<p><strong>Último Pagamento:</strong> ${cliente.ultimoPagamento}</p>` : ''}
+            `;
+            document.querySelector('.modal-title').textContent = 'Visualizar Cliente';
+            document.getElementById('client-modal').style.display = 'flex';
+        }
 
-    const modalContent = document.getElementById('modal-client-content');
-    modalContent.innerHTML = `
-        <div class="form-group">
-            <label for="nome">Nome</label>
-            <input type="text" id="nome" class="form-control" value="${cliente.nome}">
-        </div>
-        <div class="form-group">
-            <label for="cpf">CPF</label>
-            <input type="text" id="cpf" class="form-control" value="${cliente.cpf}">
-        </div>
-        <div class="form-group">
-            <label for="telefone">Telefone</label>
-            <input type="text" id="telefone" class="form-control" value="${cliente.telefone}">
-        </div>
-        <div class="form-group">
-            <label for="chavePix">Chave PIX</label>
-            <input type="text" id="chavePix" class="form-control" value="${cliente.chavePix}">
-        </div>
-        <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" class="form-control">
-                <option value="ativo" ${cliente.status === 'ativo' ? 'selected' : ''}>Ativo</option>
-                <option value="inativo" ${cliente.status === 'inativo' ? 'selected' : ''}>Inativo</option>
-                <option value="pendente" ${cliente.status === 'pendente' ? 'selected' : ''}>Pendente</option>
-            </select>
-        </div>
-        <button class="btn-save" onclick="saveClient(${cliente.id})">Salvar</button>
-    `;
-    document.getElementById('modal-client-content').previousElementSibling.textContent = 'Editar Cliente';
-    document.getElementById('client-modal').style.display = 'flex';
-}
+        // Editar cliente
+        function editClient(id) {
+            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+            const cliente = clientes.find(c => c.id === id);
+            if (!cliente) return;
 
-// Salvar alterações do cliente
-function saveClient(id) {
-    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-    const clienteIndex = clientes.findIndex(c => c.id === id);
-    if (clienteIndex === -1) return;
+            const modalContent = document.getElementById('modal-client-content');
+            modalContent.innerHTML = `
+                <div class="form-group">
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" class="form-control" value="${cliente.nome}">
+                </div>
+                <div class="form-group">
+                    <label for="cpf">CPF</label>
+                    <input type="text" id="cpf" class="form-control" value="${cliente.cpf}">
+                </div>
+                <div class="form-group">
+                    <label for="telefone">Telefone</label>
+                    <input type="text" id="telefone" class="form-control" value="${cliente.telefone}">
+                </div>
+                <div class="form-group">
+                    <label for="chavePix">Chave PIX</label>
+                    <input type="text" id="chavePix" class="form-control" value="${cliente.chavePix}">
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" class="form-control">
+                        <option value="ativo" ${cliente.status === 'ativo' ? 'selected' : ''}>Ativo</option>
+                        <option value="inativo" ${cliente.status === 'inativo' ? 'selected' : ''}>Inativo</option>
+                        <option value="pendente" ${cliente.status === 'pendente' ? 'selected' : ''}>Pendente</option>
+                    </select>
+                </div>
+                <button class="btn-save" onclick="saveClient(${cliente.id})">Salvar</button>
+            `;
+            document.querySelector('.modal-title').textContent = 'Editar Cliente';
+            document.getElementById('client-modal').style.display = 'flex';
+        }
 
-    clientes[clienteIndex] = {
-        ...clientes[clienteIndex],
-        nome: document.getElementById('nome').value,
-        cpf: document.getElementById('cpf').value,
-        telefone: document.getElementById('telefone').value,
-        chavePix: document.getElementById('chavePix').value,
-        status: document.getElementById('status').value
-    };
+        // Salvar alterações do cliente
+        function saveClient(id) {
+            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+            const clienteIndex = clientes.findIndex(c => c.id === id);
+            if (clienteIndex === -1) return;
 
-    localStorage.setItem('clientes', JSON.stringify(clientes));
-    loadClientData();
-    updateStats();
-    closeModal();
-    alert('Cliente atualizado com sucesso!');
-}
+            clientes[clienteIndex] = {
+                ...clientes[clienteIndex],
+                nome: document.getElementById('nome').value,
+                cpf: document.getElementById('cpf').value,
+                telefone: document.getElementById('telefone').value,
+                chavePix: document.getElementById('chavePix').value,
+                status: document.getElementById('status').value
+            };
 
-// Excluir cliente
-function deleteClient(id) {
-    if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
+            localStorage.setItem('clientes', JSON.stringify(clientes));
+            loadClientData();
+            updateStats();
+            closeModal();
+            alert('Cliente atualizado com sucesso!');
+        }
 
-    let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-    clientes = clientes.filter(c => c.id !== id);
-    localStorage.setItem('clientes', JSON.stringify(clientes));
-    loadClientData();
-    updateStats();
-    alert('Cliente excluído com sucesso!');
-}
+        // Excluir cliente
+        function deleteClient(id) {
+            if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
 
-// Fechar modal
-function closeModal() {
-    document.getElementById('client-modal').style.display = 'none';
-}
+            let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+            clientes = clientes.filter(c => c.id !== id);
+            localStorage.setItem('clientes', JSON.stringify(clientes));
+            loadClientData();
+            updateStats();
+            alert('Cliente excluído com sucesso!');
+        }
 
-// Logout
-function logout() {
-    if (confirm('Deseja realmente sair?')) {
-        // Aqui você pode adicionar lógica para limpar sessão ou redirecionar
-        window.location.href = '/login.html';
-    }
-}
-</script>
+        // Fechar modal
+        function closeModal() {
+            document.getElementById('client-modal').style.display = 'none';
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Deseja realmente sair?')) {
+                localStorage.removeItem('auth');
+                window.location.href = '../login.html';
+            }
+        }
+    </script>
 </body>
 </html>
