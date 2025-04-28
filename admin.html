@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Enjoei</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+:root {
+    --primary-color: #61005D;
+    --primary-light: #8E3A8B;
+    --secondary-color: #FFC0CB;
+    --text-color: #333;
+    --light-gray: #f5f5f5;
+    --medium-gray: #e0e0e0;
+    --dark-gray: #666;
+    --error-color: #e74c3c;
+    --success-color: #2ecc71;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
+    color: var(--text-color);
+    line-height: 1.4;
+    font-size: 12px; /* Base pequena para mobile */
+}
+
+.admin-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    padding: 8px 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.admin-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 8px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px;
+}
+
+.admin-title {
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.logout-btn {
+    background-color: white;
+    color: var(--primary-color);
+    border: none;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.logout-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.sidebar {
+    background-color: white;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.sidebar-menu li {
+    margin-bottom: 6px;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.sidebar-menu a:hover, .sidebar-menu a.active {
+    background-color: var(--primary-light);
+    color: white;
+}
+
+.sidebar-menu i {
+    margin-right: 6px;
+    width: 14px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.main-content {
+    background-color: white;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.section-title {
+    color: var(--primary-color);
+    font-size: 13px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--medium-gray);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.stat-card {
+    background-color: white;
+    border-radius: 4px;
+    padding: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    border-left: 2px solid var(--primary-color);
+}
+
+.stat-card h3 {
+    font-size: 9px;
+    color: var(--dark-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-card p {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.chart-container {
+    margin-bottom: 15px;
+    position: relative;
+    height: 150px;
+    width: 100%;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 15px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.data-table th, .data-table td {
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--medium-gray);
+    font-size: 10px;
+}
+
+.data-table th {
+    background-color: var(--light-gray);
+    color: var(--primary-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 9px;
+}
+
+.data-table tr:hover {
+    background-color: #fafafa;
+}
+
+.badge {
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-size: 8px;
+    font-weight: 600;
+}
+
+.badge-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.action-btn {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 9px;
+    margin-right: 3px;
+    transition: all 0.2s;
+}
+
+.view-btn {
+    background-color: var(--primary-light);
+    color: white;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.action-btn:hover {
+    opacity: 0.8;
+}
+
+.payment-settings {
+    background-color: white;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 10px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--medium-gray);
+    border-radius: 3px;
+    font-size: 10px;
+}
+
+.form-control:focus {
+    border-color: var(--primary-light);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(97, 0, 93, 0.1);
+}
+
+.btn-save {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.btn-save:hover {
+    background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+    transform: translateY(-1px);
+}
+
+.qr-preview {
+    text-align: center;
+    margin: 10px 0;
+    padding: 8px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.qr-preview img {
+    max-width: 100%;
+    max-height: 80px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 4px;
+    background: white;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 10px;
+    border-radius: 4px;
+    width: 95%;
+    max-width: 260px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.modal-title {
+    margin-top: 0;
+    color: var(--primary-color);
+    font-size: 12px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Estilos para telas maiores */
+@media (min-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+
+    .dashboard {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 15px;
+    }
+
+    .admin-container {
+        padding: 15px;
+    }
+
+    .admin-header {
+        padding: 12px 0;
+    }
+
+    .header-content {
+        padding: 0 12px;
+    }
+
+    .admin-title {
+        font-size: 20px;
+    }
+
+    .logout-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .sidebar {
+        padding: 15px;
+    }
+
+    .sidebar-menu a {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .sidebar-menu i {
+        margin-right: 8px;
+        width: 16px;
+        font-size: 14px;
+    }
+
+    .main-content {
+        padding: 15px;
+    }
+
+    .section-title {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+
+    .stats-cards {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .stat-card h3 {
+        font-size: 11px;
+    }
+
+    .stat-card p {
+        font-size: 18px;
+    }
+
+    .chart-container {
+        height: 200px;
+    }
+
+    .data-table th, .data-table td {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+
+    .data-table th {
+        font-size: 10px;
+    }
+
+    .badge {
+        padding: 3px 6px;
+        font-size: 10px;
+    }
+
+    .action-btn {
+        padding: 5px 10px;
+        font-size: 10px;
+    }
+
+    .payment-settings {
+        padding: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-group label {
+        font-size: 12px;
+    }
+
+    .form-control {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .btn-save {
+        padding: 8px 15px;
+        font-size: 12px;
+        width: auto;
+    }
+
+    .qr-preview {
+        padding: 10px;
+        margin: 12px 0;
+    }
+
+    .qr-preview img {
+        max-height: 120px;
+    }
+
+    .modal-content {
+        padding: 15px;
+        max-width: 400px;
+    }
+
+    .modal-title {
+        font-size: 14px;
+    }
+
+    .close-modal {
+        font-size: 18px;
+    }
+}
+
+@media (min-width: 1024px) {
+    body {
+        font-size: 16px;
+    }
+
+    .dashboard {
+        grid-template-columns: 250px 1fr;
+        gap: 20px;
+    }
+
+    .admin-container {
+        padding: 20px;
+    }
+
+    .admin-header {
+        padding: 15px 0;
+    }
+
+    .header-content {
+        padding: 0 15px;
+    }
+
+    .admin-title {
+        font-size: 24px;
+    }
+
+    .logout-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .sidebar {
+        padding: 20px;
+    }
+
+    .sidebar-menu a {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .sidebar-menu i {
+        margin-right: 10px;
+        width: 18px;
+        font-size: 16px;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+
+    .stats-cards {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-card h3 {
+        font-size: 12px;
+    }
+
+    .stat-card p {
+        font-size: 20px;
+    }
+
+    .chart-container {
+        height: 250px;
+    }
+
+    .data-table th, .data-table td {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .data-table th {
+        font-size: 11px;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .action-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    .payment-settings {
+        padding: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+    }
+
+    .form-control {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .btn-save {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+
+    .qr-preview {
+        padding: 12px;
+        margin: 15px 0;
+    }
+
+    .qr-preview img {
+        max-height: 150px;
+    }
+
+    .modal-content {
+        padding: 20px;
+        max-width: 500px;
+    }
+
+    .modal-title {
+        font-size: 16px;
+    }
+
+    .close-modal {
+        font-size: 20px;
+    }
+}
+    </style>
+</head>
+<body>
+    <header class="admin-header">
+        <div class="header-content">
+            <h1 class="admin-title">Painel Administrativo</h1>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </header>
+    
+    <div class="admin-container">
+        <div class="dashboard">
+            <aside class="sidebar">
+                <ul class="sidebar-menu">
+                    <li><a href="#" class="active"><i>📊</i> Dashboard</a></li>
+                    <li><a href="#clientes"><i>👥</i> Clientes</a></li>
+                    <li><a href="#config-pix" class="active"><i>🔧</i> Config. PIX</a></li>
+                    <li><a href="#relatorios"><i>📈</i> Relatórios</a></li>
+                </ul>
+            </aside>
+            
+            <main class="main-content">
+                <h2 class="section-title">Visão Geral</h2>
+                
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <h3>Clientes Ativos</h3>
+                        <p id="clientes-ativos">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Clientes Inativos</h3>
+                        <p id="clientes-inativos">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pagamentos Hoje</h3>
+                        <p id="pagamentos-hoje">0</p>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="clientes-chart"></canvas>
+                </div>
+                
+                <h2 class="section-title">Configurações de Pagamento PIX</h2>
+                
+                <div class="payment-settings">
+                    <div class="form-group">
+                        <label for="qr-code-image">QR Code</label>
+                        <input type="file" id="qr-code-image" class="form-control" accept="image/*">
+                        <div class="qr-preview">
+                            <img id="qr-preview" src="/img/qrcode.jpg" alt="QR Code Atual">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pix-copy-paste">PIX Copia e Cola</label>
+                        <textarea id="pix-copy-paste" class="form-control" rows="4">00020126850014br.gov.bcb.pix2563pix.voluti.com.br/qr/v3/at/e090cf24-506a-4905-865b-30fbd4d833c85204000053039865802BR5925PAGFACIL_MEIOS_DE_PAGAMEN6005SINOP62070503***63043678</textarea>
+                    </div>
+                    
+                    <button class="btn-save" onclick="savePaymentSettings()">Salvar Configurações</button>
+                </div>
+                
+                <h2 class="section-title" id="clientes">Clientes Cadastrados</h2>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Telefone</th>
+                                <th>Chave Pix</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientes-table-body">
+                            <!-- Dados serão inseridos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal para visualização/edição -->
+    <div class="modal" id="client-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 class="modal-title">Editar Cliente</h3>
+            <div id="modal-client-content">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados iniciais
+        let paymentSettings = {
+            qrCode: "/img/qrcode.jpg",
+            pixCopyPaste: "00020126850014br.gov.bcb.pix2563pix.voluti.com.br/qr/v3/at/e090cf24-506a-4905-865b-30fbd4d833c85204000053039865802BR5925PAGFACIL_MEIOS_DE_PAGAMEN6005SINOP62070503***63043678"
+        };
+
+        let clientesChart = null;
+
+        // Carregar dados ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPaymentSettings();
+            loadClientData();
+            updateStats();
+            initChart();
+            
+            // Preview do QR Code ao selecionar imagem
+            document.getElementById('qr-code-image').addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('qr-preview').src = event.target.result;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+        });
+
+        // Inicializar gráfico
+        function initChart() {
+            const ctx = document.getElementById('clientes-chart').getContext('2d');
+            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+            
+            const ativos = clientes.filter(c => c.status === 'ativo').length;
+            const inativos = clientes.filter(c => c.status === 'inativo').length;
+            const pendentes = clientes.filter(c => c.status === 'pendente').length;
+            
+            clientesChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ativos', 'Inativos', 'Pendentes'],
+                    datasets: [{
+                        data: [ativos, inativos, pendentes],
+                        backgroundColor: [
+                            '#2ecc71',
+                            '#e74c3c',
+                            '#f39c12'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribuição de Clientes',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Atualizar estatísticas
+function updateStats() {
+    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    
+    const ativos = clientes.filter(c => c.status === 'ativo').length;
+    const inativos = clientes.filter(c => c.status === 'inativo').length;
+    const pagamentosHoje = clientes.filter(c => {
+        const hoje = new Date().toISOString().split('T')[0];
+        return c.ultimoPagamento && c.ultimoPagamento.includes(hoje);
+    }).length;
+
+    document.getElementById('clientes-ativos').textContent = ativos;
+    document.getElementById('clientes-inativos').textContent = inativos;
+    document.getElementById('pagamentos-hoje').textContent = pagamentosHoje;
+
+    // Atualizar gráfico
+    if (clientesChart) {
+        clientesChart.data.datasets[0].data = [
+            ativos,
+            inativos,
+            clientes.filter(c => c.status === 'pendente').length
+        ];
+        clientesChart.update();
+    }
+}
+
+// Carregar configurações de pagamento
+function loadPaymentSettings() {
+    document.getElementById('qr-preview').src = paymentSettings.qrCode;
+    document.getElementById('pix-copy-paste').value = paymentSettings.pixCopyPaste;
+}
+
+// Salvar configurações de pagamento
+function savePaymentSettings() {
+    const qrInput = document.getElementById('qr-code-image');
+    const pixCopyPaste = document.getElementById('pix-copy-paste').value;
+
+    // Atualizar configurações
+    paymentSettings.pixCopyPaste = pixCopyPaste;
+
+    if (qrInput.files && qrInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            paymentSettings.qrCode = event.target.result;
+            document.getElementById('qr-preview').src = event.target.result;
+            localStorage.setItem('paymentSettings', JSON.stringify(paymentSettings));
+            alert('Configurações salvas com sucesso!');
+        };
+        reader.readAsDataURL(qrInput.files[0]);
+    } else {
+        localStorage.setItem('paymentSettings', JSON.stringify(paymentSettings));
+        alert('Configurações salvas com sucesso!');
+    }
+}
+
+// Carregar dados dos clientes
+function loadClientData() {
+    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    const tbody = document.getElementById('clientes-table-body');
+    tbody.innerHTML = '';
+
+    clientes.forEach(cliente => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${cliente.id}</td>
+            <td>${cliente.nome}</td>
+            <td>${cliente.cpf}</td>
+            <td>${cliente.telefone}</td>
+            <td>${cliente.chavePix}</td>
+            <td><span class="badge badge-${
+                cliente.status === 'ativo' ? 'success' : 
+                cliente.status === 'inativo' ? 'danger' : 'warning'
+            }">${cliente.status.charAt(0).toUpperCase() + cliente.status.slice(1)}</span></td>
+            <td>
+                <button class="action-btn view-btn" onclick="viewClient(${cliente.id})">Ver</button>
+                <button class="action-btn edit-btn" onclick="editClient(${cliente.id})">Editar</button>
+                <button class="action-btn delete-btn" onclick="deleteClient(${cliente.id})">Excluir</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Visualizar cliente
+function viewClient(id) {
+    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    const cliente = clientes.find(c => c.id === id);
+    if (!cliente) return;
+
+    const modalContent = document.getElementById('modal-client-content');
+    modalContent.innerHTML = `
+        <p><strong>Nome:</strong> ${cliente.nome}</p>
+        <p><strong>CPF:</strong> ${cliente.cpf}</p>
+        <p><strong>Telefone:</strong> ${cliente.telefone}</p>
+        <p><strong>Chave PIX:</strong> ${cliente.chavePix}</p>
+        <p><strong>Status:</strong> ${cliente.status}</p>
+    `;
+    document.getElementById('modal-client-content').previousElementSibling.textContent = 'Visualizar Cliente';
+    document.getElementById('client-modal').style.display = 'flex';
+}
+
+// Editar cliente
+function editClient(id) {
+    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    const cliente = clientes.find(c => c.id === id);
+    if (!cliente) return;
+
+    const modalContent = document.getElementById('modal-client-content');
+    modalContent.innerHTML = `
+        <div class="form-group">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" class="form-control" value="${cliente.nome}">
+        </div>
+        <div class="form-group">
+            <label for="cpf">CPF</label>
+            <input type="text" id="cpf" class="form-control" value="${cliente.cpf}">
+        </div>
+        <div class="form-group">
+            <label for="telefone">Telefone</label>
+            <input type="text" id="telefone" class="form-control" value="${cliente.telefone}">
+        </div>
+        <div class="form-group">
+            <label for="chavePix">Chave PIX</label>
+            <input type="text" id="chavePix" class="form-control" value="${cliente.chavePix}">
+        </div>
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" class="form-control">
+                <option value="ativo" ${cliente.status === 'ativo' ? 'selected' : ''}>Ativo</option>
+                <option value="inativo" ${cliente.status === 'inativo' ? 'selected' : ''}>Inativo</option>
+                <option value="pendente" ${cliente.status === 'pendente' ? 'selected' : ''}>Pendente</option>
+            </select>
+        </div>
+        <button class="btn-save" onclick="saveClient(${cliente.id})">Salvar</button>
+    `;
+    document.getElementById('modal-client-content').previousElementSibling.textContent = 'Editar Cliente';
+    document.getElementById('client-modal').style.display = 'flex';
+}
+
+// Salvar alterações do cliente
+function saveClient(id) {
+    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    const clienteIndex = clientes.findIndex(c => c.id === id);
+    if (clienteIndex === -1) return;
+
+    clientes[clienteIndex] = {
+        ...clientes[clienteIndex],
+        nome: document.getElementById('nome').value,
+        cpf: document.getElementById('cpf').value,
+        telefone: document.getElementById('telefone').value,
+        chavePix: document.getElementById('chavePix').value,
+        status: document.getElementById('status').value
+    };
+
+    localStorage.setItem('clientes', JSON.stringify(clientes));
+    loadClientData();
+    updateStats();
+    closeModal();
+    alert('Cliente atualizado com sucesso!');
+}
+
+// Excluir cliente
+function deleteClient(id) {
+    if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
+
+    let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    clientes = clientes.filter(c => c.id !== id);
+    localStorage.setItem('clientes', JSON.stringify(clientes));
+    loadClientData();
+    updateStats();
+    alert('Cliente excluído com sucesso!');
+}
+
+// Fechar modal
+function closeModal() {
+    document.getElementById('client-modal').style.display = 'none';
+}
+
+// Logout
+function logout() {
+    if (confirm('Deseja realmente sair?')) {
+        // Aqui você pode adicionar lógica para limpar sessão ou redirecionar
+        window.location.href = '/login.html';
+    }
+}
+</script>
+</body>
+</html>
