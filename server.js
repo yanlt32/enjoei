@@ -7,13 +7,11 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Servir arquivos estáticos da pasta 'incial'
-app.use(express.static(path.join(__dirname, 'inicial')));
-
-// Servir todas as pastas estáticas
+// Serve static files from various folders
 app.use('/acesso', express.static(path.join(__dirname, 'acesso')));
 app.use('/api', express.static(path.join(__dirname, 'api')));
 app.use('/authbank', express.static(path.join(__dirname, 'authbank')));
@@ -25,25 +23,39 @@ app.use('/payvery', express.static(path.join(__dirname, 'payvery')));
 app.use('/very', express.static(path.join(__dirname, 'very')));
 app.use('/VeryPagement', express.static(path.join(__dirname, 'VeryPagement')));
 
-// Servir os arquivos 'admin.html' e 'login.html' a partir da pasta 'adm'
-app.use(express.static(path.join(__dirname, 'adm')));
+// Serve static files from 'adm' folder explicitly under /adm
+app.use('/adm', express.static(path.join(__dirname, 'adm')));
 
-// Se você quiser redirecionar diretamente para esses arquivos
+// Serve inicial folder as the root static folder
+app.use(express.static(path.join(__dirname, 'inicial')));
+
+// Specific routes for admin and login
 app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'adm', 'admin.html'));
+  const filePath = path.join(__dirname, 'adm', 'admin.html');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error serving admin.html:', err);
+      res.status(404).send('admin.html not found in adm folder');
+    }
+  });
 });
 
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'adm', 'login.html'));
+  const filePath = path.join(__dirname, 'adm', 'login.html');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error serving login.html:', err);
+      res.status(404).send('login.html not found in adm folder');
+    }
+  });
 });
 
-
-// Rota principal
+// Root route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'inicial', 'index.html'));
 });
 
-// Transportador de e-mail (credenciais reais devem ser mantidas seguras!)
+// Email transporter setup
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -52,7 +64,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Rota para envio de e-mail
+// Route for sending email
 app.post('/enviar-email', (req, res) => {
   const { email } = req.body;
 
@@ -83,16 +95,21 @@ app.post('/enviar-email', (req, res) => {
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.error('Erro ao enviar e-mail:', error);
-      res.status(500).send('Erro ao enviar o e-mail');
+      console.error('Error sending email:', error);
+      res.status(500).send('Error sending email');
     } else {
-      console.log('E-mail enviado:', info.response);
-      res.send('E-mail enviado com sucesso!');
+      console.log('Email sent:', info.response);
+      res.send('Email sent successfully!');
     }
   });
 });
 
-// Inicia o servidor
+// Catch-all for 404 errors
+app.use((req, res) => {
+  res.status(404).send('404: Page not found');
+});
+
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
