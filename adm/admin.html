@@ -71,7 +71,6 @@
             font-weight: 600;
             font-size: 10px;
             cursor: pointer;
-            
         }
 
         .logout-btn:hover {
@@ -291,7 +290,7 @@
             box-shadow: 0 0 0 2px rgba(97, 0, 93, 0.1);
         }
 
-        .btn-save {
+        .btn-save, .btn-refresh {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
             border: none;
@@ -304,9 +303,18 @@
             width: 100%;
         }
 
-        .btn-save:hover {
+        .btn-save:hover, .btn-refresh:hover {
             background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
             transform: translateY(-1px);
+        }
+
+        .btn-refresh {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            margin-bottom: 10px;
+        }
+
+        .btn-refresh:hover {
+            background: linear-gradient(135deg, #66BB6A, #4CAF50);
         }
 
         .qr-preview {
@@ -477,7 +485,7 @@
                 font-size: 12px;
             }
 
-            .btn-save {
+            .btn-save, .btn-refresh {
                 padding: 8px 15px;
                 font-size: 12px;
                 width: auto;
@@ -546,7 +554,7 @@
                 font-size: 14px;
             }
 
-            .sidebar-menu i {
+            .sidebar-menu i coarse {
                 margin-right: 10px;
                 width: 18px;
                 font-size: 16px;
@@ -618,7 +626,7 @@
                 font-size: 13px;
             }
 
-            .btn-save {
+            .btn-save, .btn-refresh {
                 padding: 10px 20px;
                 font-size: 13px;
             }
@@ -708,7 +716,7 @@
                     
                     <div class="form-group">
                         <label for="pix-copy-paste">PIX Copia e Cola</label>
-                        <textarea id="pix-copy-paste" class="form-control" rows="4">00020126850014br.gov.bcb.pix2563pix.voluti.com.br/qr/v3/at/e090cf24-506a-4905-865b-30fbd4d833c85204000053039865802BR5925PAGFACIL_MEIOS_DE_PAGAMEN6005SINOP62070503***63043678</textarea>
+                        <textarea id="pix-copy-paste" class="form-control" rows="4" placeholder="Insira o código PIX Copia e Cola"></textarea>
                     </div>
                     
                     <button class="btn-save" onclick="savePaymentSettings()">Salvar Configurações</button>
@@ -716,11 +724,13 @@
                 
                 <h2 class="section-title" id="clientes">Clientes Cadastrados</h2>
                 
+                <button class="btn-refresh" onclick="refreshData()">Atualizar Dados</button>
+                
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th†ID</th>
+                                <th>ID</th>
                                 <th>Nome</th>
                                 <th>CPF</th>
                                 <th>Telefone</th>
@@ -751,26 +761,49 @@
 
     <script>
         // Dados iniciais
-        let paymentSettings = {
-            qrCode: "../img/qrcode.jpg",
-            pixCopyPaste: "00020126850014br.gov.bcb.pix2563pix.voluti.com.br/qr/v3/at/e090cf24-506a-4905-865b-30fbd4d833c85204000053039865802BR5925PAGFACIL_MEIOS_DE_PAGAMEN6005SINOP62070503***63043678"
-        };
-
+        let paymentSettings = {};
         let clientesChart = null;
-
+        const API_URL = 'http://localhost:3000/api';
+        let isSessionExpired = false; // Flag para evitar múltiplas mensagens
+    
+        // Função para obter os cabeçalhos com o token de autenticação
+        function getAuthHeaders() {
+            const token = localStorage.getItem('auth');
+            return {
+                'Authorization': `Bearer ${token}`
+            };
+        }
+    
+        // Função para tratar erros de resposta da API
+        function handleResponse(response) {
+            if (response.status === 401 || response.status === 403) {
+                if (!isSessionExpired) {
+                    isSessionExpired = true;
+                    alert('Sessão expirada ou não autorizada. Faça login novamente.');
+                    logout();
+                }
+                throw new Error('Não autorizado');
+            }
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Erro na requisição');
+                });
+            }
+            return response.json();
+        }
+    
         // Carregar dados ao iniciar
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar autenticação novamente para garantir
             if (!localStorage.getItem('auth')) {
                 window.location.href = '../login.html';
                 return;
             }
-
+    
             loadPaymentSettings();
             loadClientData();
             updateStats();
             initChart();
-            
+    
             // Preview do QR Code ao selecionar imagem
             document.getElementById('qr-code-image').addEventListener('change', function(e) {
                 if (e.target.files && e.target.files[0]) {
@@ -781,239 +814,319 @@
                     reader.readAsDataURL(e.target.files[0]);
                 }
             });
+    
+            // Atualização automática a cada 30 segundos, mas só se a sessão não expirou
+            setInterval(() => {
+                if (!isSessionExpired) {
+                    refreshData();
+                }
+            }, 30000);
         });
-
+    
         // Inicializar gráfico
         function initChart() {
             const ctx = document.getElementById('clientes-chart').getContext('2d');
-            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-            
-            const ativos = clientes.filter(c => c.status === 'ativo').length;
-            const inativos = clientes.filter(c => c.status === 'inativo').length;
-            const pendentes = clientes.filter(c => c.status === 'pendente').length;
-            
-            clientesChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Ativos', 'Inativos', 'Pendentes'],
-                    datasets: [{
-                        data: [ativos, inativos, pendentes],
-                        backgroundColor: [
-                            '#2ecc71',
-                            '#e74c3c',
-                            '#f39c12'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
+            fetch(`${API_URL}/clients`, {
+                headers: getAuthHeaders()
+            })
+                .then(handleResponse)
+                .then(clientes => {
+                    const ativos = clientes.filter(c => c.status === 'ativo').length;
+                    const inativos = clientes.filter(c => c.status === 'inativo').length;
+                    const pendentes = clientes.filter(c => c.status === 'pendente').length;
+    
+                    clientesChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Ativos', 'Inativos', 'Pendentes'],
+                            datasets: [{
+                                data: [ativos, inativos, pendentes],
+                                backgroundColor: ['#2ecc71', '#e74c3c', '#f39c12'],
+                                borderWidth: 1
+                            }]
                         },
-                        title: {
-                            display: true,
-                            text: 'Distribuição de Clientes',
-                            font: {
-                                size: 16
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Distribuição de Clientes',
+                                    font: { size: 16 }
+                                }
                             }
                         }
-                    }
-                }
-            });
+                    });
+                })
+                .catch(error => console.error('Erro ao inicializar o gráfico:', error));
         }
-
+    
         // Atualizar estatísticas
         function updateStats() {
-            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-            
-            const ativos = clientes.filter(c => c.status === 'ativo').length;
-            const inativos = clientes.filter(c => c.status === 'inativo').length;
-            const pagamentosHoje = clientes.filter(c => {
-                const hoje = new Date().toISOString().split('T')[0];
-                return c.ultimoPagamento && c.ultimoPagamento.includes(hoje);
-            }).length;
-
-            document.getElementById('clientes-ativos').textContent = ativos;
-            document.getElementById('clientes-inativos').textContent = inativos;
-            document.getElementById('pagamentos-hoje').textContent = pagamentosHoje;
-
-            // Atualizar gráfico
-            if (clientesChart) {
-                clientesChart.data.datasets[0].data = [
-                    ativos,
-                    inativos,
-                    clientes.filter(c => c.status === 'pendente').length
-                ];
-                clientesChart.update();
-            }
+            fetch(`${API_URL}/clients`, {
+                headers: getAuthHeaders()
+            })
+                .then(handleResponse)
+                .then(clientes => {
+                    const ativos = clientes.filter(c => c.status === 'ativo').length;
+                    const inativos = clientes.filter(c => c.status === 'inativo').length;
+                    const pagamentosHoje = clientes.filter(c => {
+                        const hoje = new Date().toISOString().split('T')[0];
+                        return c.ultimoPagamento && c.ultimoPagamento.includes(hoje);
+                    }).length;
+    
+                    document.getElementById('clientes-ativos').textContent = ativos;
+                    document.getElementById('clientes-inativos').textContent = inativos;
+                    document.getElementById('pagamentos-hoje').textContent = pagamentosHoje;
+    
+                    if (clientesChart) {
+                        clientesChart.data.datasets[0].data = [
+                            ativos,
+                            inativos,
+                            clientes.filter(c => c.status === 'pendente').length
+                        ];
+                        clientesChart.update();
+                    }
+                })
+                .catch(error => console.error('Erro ao atualizar estatísticas:', error));
         }
-
+    
         // Carregar configurações de pagamento
         function loadPaymentSettings() {
-            const savedSettings = JSON.parse(localStorage.getItem('paymentSettings'));
-            if (savedSettings) {
-                paymentSettings = savedSettings;
-            }
-            document.getElementById('qr-preview').src = paymentSettings.qrCode;
-            document.getElementById('pix-copy-paste').value = paymentSettings.pixCopyPaste;
+            fetch(`${API_URL}/payment-settings`, {
+                headers: getAuthHeaders()
+            })
+                .then(handleResponse)
+                .then(settings => {
+                    paymentSettings = settings;
+                    document.getElementById('qr-preview').src = paymentSettings.qrCode;
+                    document.getElementById('pix-copy-paste').value = paymentSettings.pixCopyPaste || '';
+                })
+                .catch(error => console.error('Erro ao carregar configurações de pagamento:', error));
         }
-
+    
         // Salvar configurações de pagamento
         function savePaymentSettings() {
             const qrInput = document.getElementById('qr-code-image');
             const pixCopyPaste = document.getElementById('pix-copy-paste').value;
-
-            // Atualizar configurações
-            paymentSettings.pixCopyPaste = pixCopyPaste;
-
-            if (qrInput.files && qrInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    paymentSettings.qrCode = event.target.result;
-                    document.getElementById('qr-preview').src = event.target.result;
-                    localStorage.setItem('paymentSettings', JSON.stringify(paymentSettings));
-                    alert('Configurações salvas com sucesso!');
-                };
-                reader.readAsDataURL(qrInput.files[0]);
-            } else {
-                localStorage.setItem('paymentSettings', JSON.stringify(paymentSettings));
-                alert('Configurações salvas com sucesso!');
+    
+            if (!pixCopyPaste.trim()) {
+                alert('Por favor, insira o código PIX Copia e Cola.');
+                return;
             }
+    
+            const formData = new FormData();
+            formData.append('pixCopyPaste', pixCopyPaste);
+            if (qrInput.files && qrInput.files[0]) {
+                formData.append('qrCode', qrInput.files[0]);
+            }
+    
+            fetch(`${API_URL}/payment-settings`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: formData
+            })
+                .then(handleResponse)
+                .then(updatedSettings => {
+                    paymentSettings = updatedSettings;
+                    document.getElementById('qr-preview').src = paymentSettings.qrCode;
+                    alert('Configurações salvas com sucesso!');
+                })
+                .catch(error => {
+                    console.error('Erro ao salvar configurações de pagamento:', error);
+                    alert('Erro ao salvar configurações: ' + error.message);
+                });
         }
-
+    
         // Carregar dados dos clientes
         function loadClientData() {
-            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-            const tbody = document.getElementById('clientes-table-body');
-            tbody.innerHTML = '';
-
-            clientes.forEach(cliente => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${cliente.id}</td>
-                    <td>${cliente.nome}</td>
-                    <td>${cliente.cpf}</td>
-                    <td>${cliente.telefone}</td>
-                    <td>${cliente.chavePix}</td>
-                    <td><span class="badge badge-${
-                        cliente.status === 'ativo' ? 'success' : 
-                        cliente.status === 'inativo' ? 'danger' : 'warning'
-                    }">${cliente.status.charAt(0).toUpperCase() + cliente.status.slice(1)}</span></td>
-                    <td>
-                        <button class="action-btn view-btn" onclick="viewClient(${cliente.id})">Ver</button>
-                        <button class="action-btn edit-btn" onclick="editClient(${cliente.id})">Editar</button>
-                        <button class="action-btn delete-btn" onclick="deleteClient(${cliente.id})">Excluir</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
+            fetch(`${API_URL}/clients`, {
+                headers: getAuthHeaders()
+            })
+                .then(handleResponse)
+                .then(clientes => {
+                    const tbody = document.getElementById('clientes-table-body');
+                    tbody.innerHTML = '';
+    
+                    clientes.forEach(cliente => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${cliente.id}</td>
+                            <td>${cliente.nome || '-'}</td>
+                            <td>${cliente.cpf || '-'}</td>
+                            <td>${cliente.telefone || '-'}</td>
+                            <td>${cliente.chavePix || '-'}</td>
+                            <td><span class="badge badge-${
+                                cliente.status === 'ativo' ? 'success' : 
+                                cliente.status === 'inativo' ? 'danger' : 'warning'
+                            }">${(cliente.status || '').charAt(0).toUpperCase() + (cliente.status || '').slice(1)}</span></td>
+                            <td>
+                                <button class="action-btn view-btn" onclick="viewClient(${cliente.id})">Ver</button>
+                                <button class="action-btn edit-btn" onclick="editClient(${cliente.id})">Editar</button>
+                                <button class="action-btn delete-btn" onclick="deleteClient(${cliente.id})">Excluir</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Erro ao carregar dados dos clientes:', error));
         }
-
+    
         // Visualizar cliente
         function viewClient(id) {
-            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-            const cliente = clientes.find(c => c.id === id);
-            if (!cliente) return;
-
-            const modalContent = document.getElementById('modal-client-content');
-            modalContent.innerHTML = `
-                <p><strong>Nome:</strong> ${cliente.nome}</p>
-                <p><strong>CPF:</strong> ${cliente.cpf}</p>
-                <p><strong>Telefone:</strong> ${cliente.telefone}</p>
-                <p><strong>Chave PIX:</strong> ${cliente.chavePix}</p>
-                <p><strong>Status:</strong> ${cliente.status}</p>
-                ${cliente.ultimoPagamento ? `<p><strong>Último Pagamento:</strong> ${cliente.ultimoPagamento}</p>` : ''}
-            `;
-            document.querySelector('.modal-title').textContent = 'Visualizar Cliente';
-            document.getElementById('client-modal').style.display = 'flex';
+            fetch(`${API_URL}/clients`, {
+                headers: getAuthHeaders()
+            })
+                .then(handleResponse)
+                .then(clientes => {
+                    const cliente = clientes.find(c => c.id === id);
+                    if (!cliente) {
+                        alert('Cliente não encontrado.');
+                        return;
+                    }
+    
+                    const modalContent = document.getElementById('modal-client-content');
+                    modalContent.innerHTML = `
+                        <p><strong>Nome:</strong> ${cliente.nome || '-'}</p>
+                        <p><strong>CPF:</strong> ${cliente.cpf || '-'}</p>
+                        <p><strong>Telefone:</strong> ${cliente.telefone || '-'}</p>
+                        <p><strong>Chave PIX:</strong> ${cliente.chavePix || '-'}</p>
+                        <p><strong>Status:</strong> ${(cliente.status || '').charAt(0).toUpperCase() + (cliente.status || '').slice(1)}</p>
+                        ${cliente.ultimoPagamento ? `<p><strong>Último Pagamento:</strong> ${cliente.ultimoPagamento}</p>` : ''}
+                    `;
+                    document.querySelector('.modal-title').textContent = 'Visualizar Cliente';
+                    document.getElementById('client-modal').style.display = 'flex';
+                })
+                .catch(error => console.error('Erro ao visualizar cliente:', error));
         }
-
+    
         // Editar cliente
         function editClient(id) {
-            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-            const cliente = clientes.find(c => c.id === id);
-            if (!cliente) return;
-
-            const modalContent = document.getElementById('modal-client-content');
-            modalContent.innerHTML = `
-                <div class="form-group">
-                    <label for="nome">Nome</label>
-                    <input type="text" id="nome" class="form-control" value="${cliente.nome}">
-                </div>
-                <div class="form-group">
-                    <label for="cpf">CPF</label>
-                    <input type="text" id="cpf" class="form-control" value="${cliente.cpf}">
-                </div>
-                <div class="form-group">
-                    <label for="telefone">Telefone</label>
-                    <input type="text" id="telefone" class="form-control" value="${cliente.telefone}">
-                </div>
-                <div class="form-group">
-                    <label for="chavePix">Chave PIX</label>
-                    <input type="text" id="chavePix" class="form-control" value="${cliente.chavePix}">
-                </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status" class="form-control">
-                        <option value="ativo" ${cliente.status === 'ativo' ? 'selected' : ''}>Ativo</option>
-                        <option value="inativo" ${cliente.status === 'inativo' ? 'selected' : ''}>Inativo</option>
-                        <option value="pendente" ${cliente.status === 'pendente' ? 'selected' : ''}>Pendente</option>
-                    </select>
-                </div>
-                <button class="btn-save" onclick="saveClient(${cliente.id})">Salvar</button>
-            `;
-            document.querySelector('.modal-title').textContent = 'Editar Cliente';
-            document.getElementById('client-modal').style.display = 'flex';
+            fetch(`${API_URL}/clients`, {
+                headers: getAuthHeaders()
+            })
+                .then(handleResponse)
+                .then(clientes => {
+                    const cliente = clientes.find(c => c.id === id);
+                    if (!cliente) {
+                        alert('Cliente não encontrado.');
+                        return;
+                    }
+    
+                    const modalContent = document.getElementById('modal-client-content');
+                    modalContent.innerHTML = `
+                        <div class="form-group">
+                            <label for="nome">Nome</label>
+                            <input type="text" id="nome" class="form-control" value="${cliente.nome || ''}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cpf">CPF</label>
+                            <input type="text" id="cpf" class="form-control" value="${cliente.cpf || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="telefone">Telefone</label>
+                            <input type="text" id="telefone" class="form-control" value="${cliente.telefone || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="chavePix">Chave PIX</label>
+                            <input type="text" id="chavePix" class="form-control" value="${cliente.chavePix || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" class="form-control">
+                                <option value="ativo" ${cliente.status === 'ativo' ? 'selected' : ''}>Ativo</option>
+                                <option value="inativo" ${cliente.status === 'inativo' ? 'selected' : ''}>Inativo</option>
+                                <option value="pendente" ${cliente.status === 'pendente' ? 'selected' : ''}>Pendente</option>
+                            </select>
+                        </div>
+                        <button class="btn-save" onclick="saveClient(${cliente.id})">Salvar</button>
+                    `;
+                    document.querySelector('.modal-title').textContent = 'Editar Cliente';
+                    document.getElementById('client-modal').style.display = 'flex';
+                })
+                .catch(error => console.error('Erro ao editar cliente:', error));
         }
-
+    
         // Salvar alterações do cliente
         function saveClient(id) {
-            const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-            const clienteIndex = clientes.findIndex(c => c.id === id);
-            if (clienteIndex === -1) return;
-
-            clientes[clienteIndex] = {
-                ...clientes[clienteIndex],
-                nome: document.getElementById('nome').value,
+            const nome = document.getElementById('nome').value;
+            if (!nome.trim()) {
+                alert('O nome é obrigatório.');
+                return;
+            }
+    
+            const updatedClient = {
+                nome,
                 cpf: document.getElementById('cpf').value,
                 telefone: document.getElementById('telefone').value,
                 chavePix: document.getElementById('chavePix').value,
                 status: document.getElementById('status').value
             };
-
-            localStorage.setItem('clientes', JSON.stringify(clientes));
-            loadClientData();
-            updateStats();
-            closeModal();
-            alert('Cliente atualizado com sucesso!');
+    
+            fetch(`${API_URL}/clients/${id}`, {
+                method: 'PUT',
+                headers: {
+                    ...getAuthHeaders(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedClient)
+            })
+                .then(handleResponse)
+                .then(() => {
+                    loadClientData();
+                    updateStats();
+                    closeModal();
+                    alert('Cliente atualizado com sucesso!');
+                })
+                .catch(error => {
+                    console.error('Erro ao salvar cliente:', error);
+                    alert('Erro ao salvar cliente: ' + error.message);
+                });
         }
-
+    
         // Excluir cliente
         function deleteClient(id) {
             if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
-
-            let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-            clientes = clientes.filter(c => c.id !== id);
-            localStorage.setItem('clientes', JSON.stringify(clientes));
-            loadClientData();
-            updateStats();
-            alert('Cliente excluído com sucesso!');
+    
+            fetch(`${API_URL}/clients/${id}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            })
+                .then(response => {
+                    if (!response.ok && response.status !== 204) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Erro ao excluir cliente');
+                        });
+                    }
+                    loadClientData();
+                    updateStats();
+                    alert('Cliente excluído com sucesso!');
+                })
+                .catch(error => {
+                    console.error('Erro ao excluir cliente:', error);
+                    alert('Erro ao excluir cliente: ' + error.message);
+                });
         }
-
+    
         // Fechar modal
         function closeModal() {
             document.getElementById('client-modal').style.display = 'none';
         }
-
+    
         // Logout
         function logout() {
-            if (confirm('Deseja realmente sair?')) {
-                localStorage.removeItem('auth');
-                window.location.href = '../login.html';
-            }
+            localStorage.removeItem('auth');
+            window.location.href = '../login.html';
+        }
+    
+        // Atualizar dados manualmente
+        function refreshData() {
+            loadClientData();
+            updateStats();
+            loadPaymentSettings();
         }
     </script>
 </body>
