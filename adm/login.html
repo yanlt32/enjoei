@@ -199,8 +199,8 @@
             if (username === validUsername && password === validPassword) {
                 // Armazena o token de autenticação
                 localStorage.setItem('auth', 'true');
-                // Redireciona usando caminho relativo
-                window.location.href = './admin/admin.html';
+                // Redireciona para admin.html (subindo uma pasta)
+                window.location.href = '../adm/admin.html';
             } else {
                 errorMessage.style.display = 'block';
                 setTimeout(() => {
@@ -211,7 +211,7 @@
 
         // Se o usuário já estiver autenticado, redireciona direto
         if (localStorage.getItem('auth')) {
-            window.location.href = './admin/admin.html';
+            window.location.href = '../adm/admin.html';
         }
     </script>
 </body>
