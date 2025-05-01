@@ -5,14 +5,15 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
-const sqlite3 = require('sqlite3').verbose(); // Importar o SQLite
+const sqlite3 = require('sqlite3').verbose();
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = 'sua_chave_secreta_aqui';
+const JWT_SECRET = process.env.JWT_SECRET || 'sua_chave_secreta_aqui';
 
 // Conexão com o banco de dados SQLite
-const db = new sqlite3.Database('./enjoei.db', (err) => {
+const db = new sqlite3.Database(path.join(__dirname, 'enjoei.db'), (err) => {
     if (err) {
         console.error('Erro ao conectar ao SQLite:', err.message);
     } else {
@@ -20,9 +21,9 @@ const db = new sqlite3.Database('./enjoei.db', (err) => {
     }
 });
 
-// Criar tabelas no SQLite (equivalente aos esquemas do Mongoose)
+// Criar tabelas no SQLite
 db.serialize(() => {
-    // Tabela para Clientes
+    // Tabela para Clientes (adicionado campo tipoChave)
     db.run(`
         CREATE TABLE IF NOT EXISTS clients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,12 +31,14 @@ db.serialize(() => {
             cpf TEXT,
             telefone TEXT,
             chavePix TEXT,
+            tipoChave TEXT,
             status TEXT,
-            ultimoPagamento TEXT
+            ultimoPagamento TEXT,
+            dataCadastro TEXT
         )
     `);
 
-    // Tabela para Configurações de Pagamento (apenas uma linha)
+    // Tabela para Configurações de Pagamento
     db.run(`
         CREATE TABLE IF NOT EXISTS paymentSettings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,6 +60,31 @@ db.serialize(() => {
             `, ['../img/qrcode.jpg', '00020126850014br.gov.bcb.pix2563pix.voluti.com.br/qr/v3/at/e090cf24-506a-4905-865b-30fbd4d833c85204000053039865802BR5925PAGFACIL_MEIOS_DE_PAGAMEN6005SINOP62070503***63043678']);
         }
     });
+
+    // Tabela para Usuários (para autenticação de admin)
+    db.run(`
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL
+        )
+    `);
+
+    // Inserir usuário admin padrão se não existir
+    db.get('SELECT COUNT(*) as count FROM users', (err, row) => {
+        if (err) {
+            console.error('Erro ao verificar users:', err.message);
+            return;
+        }
+        if (row.count === 0) {
+            const bcrypt = require('bcrypt');
+            const hashedPassword = bcrypt.hashSync('senha123', 10);
+            db.run(`
+                INSERT INTO users (username, password)
+                VALUES (?, ?)
+            `, ['admin', hashedPassword]);
+        }
+    });
 });
 
 // Middleware
@@ -64,9 +92,14 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Configuração de upload de imagens com multer
+const fs = require('fs');
+const uploadDir = path.join(__dirname, 'Uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/');
+        cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + path.extname(file.originalname));
@@ -74,14 +107,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Certifique-se de que a pasta 'uploads' exista
-const fs = require('fs');
-if (!fs.existsSync('uploads')) {
-    fs.mkdirSync('uploads');
-}
-
 // Servir arquivos estáticos
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadDir));
 app.use('/acesso', express.static(path.join(__dirname, 'acesso')));
 app.use('/api', express.static(path.join(__dirname, 'api')));
 app.use('/authbank', express.static(path.join(__dirname, 'authbank')));
@@ -139,18 +166,80 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// Rota de login (simples, para gerar token)
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    if (username === 'admin' && password === 'senha123') {
-        const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1h' });
-        res.json({ token });
-    } else {
-        res.status(401).json({ error: 'Credenciais inválidas' });
-    }
+// Rate limiting para o endpoint público
+const clientLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100 // 100 requisições por IP
 });
 
-// Endpoints da API para gerenciar clientes (protegidos)
+// Rota de login
+const bcrypt = require('bcrypt');
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+    db.get('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
+        if (err || !user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ error: 'Credenciais inválidas' });
+        }
+        const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token });
+    });
+});
+
+// Endpoints da API para gerenciar clientes
+app.post('/api/clients', clientLimiter, (req, res) => {
+    const { nome, cpf, telefone, chavePix, tipoChave, status, ultimoPagamento, dataCadastro } = req.body;
+
+    // Validação de entrada
+    if (!nome || nome.length < 5) {
+        return res.status(400).json({ error: 'O nome é obrigatório e deve ter pelo menos 5 caracteres' });
+    }
+    if (!cpf || !/^\d{11}$/.test(cpf)) {
+        return res.status(400).json({ error: 'CPF inválido (deve ter 11 dígitos numéricos)' });
+    }
+    if (!telefone || !/^\d{10,11}$/.test(telefone)) {
+        return res.status(400).json({ error: 'Telefone inválido (deve ter 10 ou 11 dígitos numéricos)' });
+    }
+    if (!tipoChave || !['CPF', 'EMAIL', 'TELEFONE', 'ALEATORIA'].includes(tipoChave)) {
+        return res.status(400).json({ error: 'Tipo de chave Pix inválido' });
+    }
+    if (!chavePix) {
+        return res.status(400).json({ error: 'Chave Pix é obrigatória' });
+    }
+
+    // Verificar se o CPF já existe
+    db.get('SELECT * FROM clients WHERE cpf = ?', [cpf], (err, row) => {
+        if (err) {
+            console.error('Erro ao verificar CPF:', err.message);
+            return res.status(500).json({ error: 'Erro ao verificar CPF' });
+        }
+        if (row) {
+            return res.status(400).json({ error: 'Este CPF já está cadastrado' });
+        }
+
+        // Inserir novo cliente
+        db.get('SELECT MAX(id) as maxId FROM clients', (err, row) => {
+            if (err) {
+                console.error('Erro ao obter o último ID:', err.message);
+                return res.status(500).json({ error: 'Erro ao adicionar cliente' });
+            }
+
+            const newId = (row.maxId || 0) + 1;
+            db.run(
+                'INSERT INTO clients (id, nome, cpf, telefone, chavePix, tipoChave, status, ultimoPagamento, dataCadastro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [newId, nome, cpf, telefone, chavePix, tipoChave, status, ultimoPagamento, dataCadastro],
+                function (err) {
+                    if (err) {
+                        console.error('Erro ao adicionar cliente:', err.message);
+                        return res.status(500).json({ error: 'Erro ao adicionar cliente' });
+                    }
+                    res.status(201).json({ id: newId, nome, cpf, telefone, chavePix, tipoChave, status, ultimoPagamento, dataCadastro });
+                }
+            );
+        });
+    });
+});
+
+// Rotas protegidas (requerem autenticação)
 app.get('/api/clients', authenticateToken, (req, res) => {
     db.all('SELECT * FROM clients', [], (err, rows) => {
         if (err) {
@@ -161,53 +250,26 @@ app.get('/api/clients', authenticateToken, (req, res) => {
     });
 });
 
-app.post('/api/clients', authenticateToken, (req, res) => {
-    const { nome, cpf, telefone, chavePix, status, ultimoPagamento } = req.body;
-    if (!nome) {
-        return res.status(400).json({ error: 'O nome é obrigatório' });
-    }
-
-    db.get('SELECT MAX(id) as maxId FROM clients', (err, row) => {
-        if (err) {
-            console.error('Erro ao obter o último ID:', err.message);
-            return res.status(500).json({ error: 'Erro ao adicionar cliente' });
-        }
-
-        const newId = (row.maxId || 0) + 1;
-        db.run(
-            'INSERT INTO clients (id, nome, cpf, telefone, chavePix, status, ultimoPagamento) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [newId, nome, cpf, telefone, chavePix, status, ultimoPagamento],
-            function (err) {
-                if (err) {
-                    console.error('Erro ao adicionar cliente:', err.message);
-                    return res.status(500).json({ error: 'Erro ao adicionar cliente' });
-                }
-                res.status(201).json({ id: newId, nome, cpf, telefone, chavePix, status, ultimoPagamento });
-            }
-        );
-    });
-});
-
 app.put('/api/clients/:id', authenticateToken, (req, res) => {
     const id = parseInt(req.params.id);
-    const { nome, cpf, telefone, chavePix, status, ultimoPagamento } = req.body;
+    const { nome, cpf, telefone, chavePix, tipoChave, status, ultimoPagamento } = req.body;
 
     if (!nome) {
         return res.status(400).json({ error: 'O nome é obrigatório' });
     }
 
     db.run(
-        'UPDATE clients SET nome = ?, cpf = ?, telefone = ?, chavePix = ?, status = ?, ultimoPagamento = ? WHERE id = ?',
-        [nome, cpf, telefone, chavePix, status, ultimoPagamento, id],
+        'UPDATE clients SET nome = ?, cpf = ?, telefone = ?, chavePix = ?, tipoChave = ?, status = ?, ultimoPagamento = ? WHERE id = ?',
+        [nome, cpf, telefone, chavePix, tipoChave, status, ultimoPagamento, id],
         function (err) {
             if (err) {
                 console.error('Erro ao atualizar cliente:', err.message);
                 return res.status(500).json({ error: 'Erro ao atualizar cliente' });
             }
-            if (this.changes === 0(secret)) {
+            if (this.changes === 0) {
                 return res.status(404).json({ error: 'Cliente não encontrado' });
             }
-            res.json({ id, nome, cpf, telefone, chavePix, status, ultimoPagamento });
+            res.json({ id, nome, cpf, telefone, chavePix, tipoChave, status, ultimoPagamento });
         }
     );
 });
@@ -254,7 +316,6 @@ app.post('/api/payment-settings', authenticateToken, upload.single('qrCode'), (r
         };
 
         if (row) {
-            // Atualizar configurações existentes
             db.run(
                 'UPDATE paymentSettings SET qrCode = ?, pixCopyPaste = ? WHERE id = ?',
                 [updateData.qrCode, updateData.pixCopyPaste, row.id],
@@ -267,7 +328,6 @@ app.post('/api/payment-settings', authenticateToken, upload.single('qrCode'), (r
                 }
             );
         } else {
-            // Inserir novas configurações
             db.run(
                 'INSERT INTO paymentSettings (qrCode, pixCopyPaste) VALUES (?, ?)',
                 [updateData.qrCode, updateData.pixCopyPaste],
@@ -287,8 +347,8 @@ app.post('/api/payment-settings', authenticateToken, upload.single('qrCode'), (r
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'vendasenjoei427@gmail.com',
-        pass: 'lrvd jewr hmae ceqi'
+        user: process.env.EMAIL_USER || 'vendasenjoei427@gmail.com',
+        pass: process.env.EMAIL_PASS || 'lrvd jewr hmae ceqi'
     }
 });
 

