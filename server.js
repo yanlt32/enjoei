@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-const sqlite3 = require('@vscode/sqlite3').verbose();
+const sqlite3 = require('sqlite3');
 const path = require('path');
 const TelegramBot = require('node-telegram-bot-api');
 
