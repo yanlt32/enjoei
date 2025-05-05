@@ -71,14 +71,23 @@ app.use('/very', express.static(path.join(__dirname, 'very')));
 app.use('/img', express.static(path.join(__dirname, 'img')));
 app.use('/inicial', express.static(path.join(__dirname, 'inicial')));
 
-// Telegram Bot
+// Telegram Bot - Configuração melhorada
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const ADMINS = process.env.ADMINS?.split(',').map(id => parseInt(id.trim())) || [];
 let CHAT_ID = null;
 
 let bot;
 try {
-  bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
+  bot = new TelegramBot(TELEGRAM_TOKEN, {
+    polling: {
+      interval: 300,
+      autoStart: true,
+      params: {
+        timeout: 10,
+        drop_pending_updates: true // Ignora updates pendentes de outras instâncias
+      }
+    }
+  });
 
   bot.on('message', (msg) => {
     if (ADMINS.length === 0 || ADMINS.includes(msg.chat.id)) {
@@ -89,7 +98,17 @@ try {
 
   bot.on('polling_error', (error) => {
     console.error('Erro no polling do Telegram:', error.message);
+    // Reinicia o polling após 5 segundos
+    setTimeout(() => {
+      try {
+        if (bot) bot.startPolling();
+      } catch (err) {
+        console.error('Erro ao reiniciar polling:', err.message);
+      }
+    }, 5000);
   });
+
+  console.log('Bot do Telegram iniciado com sucesso');
 } catch (error) {
   console.error('Erro ao inicializar o Telegram Bot:', error.message);
 }
@@ -163,7 +182,7 @@ app.post('/api/clients', (req, res) => {
   sendConfirmationEmail(cliente, email);
 
   // Enviar para o Telegram
-  if (CHAT_ID) {
+  if (CHAT_ID && bot) {
     const msg = `✨ *Novo Cadastro Recebido!* ✨
 
 👤 *Nome:* \`${nome}\`
@@ -176,18 +195,17 @@ app.post('/api/clients', (req, res) => {
 
 📅 *Data/Hora:* _${new Date().toLocaleString()}_`;
 
-    bot.sendMessage(CHAT_ID, msg, { parse_mode: 'Markdown' }).catch((error) => {
-      console.error('Erro ao enviar mensagem para o Telegram:', error.message);
-    });
+    bot.sendMessage(CHAT_ID, msg, { parse_mode: 'Markdown' })
+      .then(() => console.log('Mensagem enviada para o Telegram'))
+      .catch(error => console.error('Erro ao enviar mensagem para o Telegram:', error.message));
   } else {
-    console.warn('CHAT_ID não foi encontrado. Verifique se um administrador interagiu com o bot.');
+    console.warn('CHAT_ID não definido ou bot não inicializado. Mensagem não enviada.');
   }
 
-  // Retornar sucesso (frontend deve redirecionar)
   res.status(201).json({ message: 'Cliente cadastrado com sucesso', redirect: '/VeryPagement/pagamento.html' });
 });
 
-// Fallback para frontend (apenas para rotas não-API)
+// Fallback para frontend
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ error: 'Rota API não encontrada' });
@@ -196,18 +214,33 @@ app.get('*', (req, res) => {
 });
 
 // Iniciar servidor
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
 
-// Fechar conexões
-process.on('SIGINT', () => {
+// Gerenciamento de encerramento
+function gracefulShutdown() {
   console.log('Encerrando servidor...');
+  
   if (bot) {
     bot.stopPolling();
     console.log('Polling do Telegram encerrado.');
   }
+  
   transporter.close();
   console.log('Conexão do Nodemailer encerrada.');
-  process.exit();
-});
+  
+  server.close(() => {
+    console.log('Servidor HTTP encerrado.');
+    process.exit(0);
+  });
+
+  // Força encerramento após 5 segundos se não concluir
+  setTimeout(() => {
+    console.error('Encerramento forçado após timeout');
+    process.exit(1);
+  }, 5000);
+}
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
