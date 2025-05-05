@@ -17,6 +17,15 @@ for (const envVar of requiredEnvVars) {
   }
 }
 
+// Configuração de CORS para permitir o domínio específico
+const corsOptions = {
+  origin: 'https://enjoei-5e5r.onrender.com', // URL do seu frontend
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions)); // Definindo CORS
+
 // Página inicial
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'inicial', 'index.html'));
@@ -86,7 +95,6 @@ try {
 }
 
 // Middleware
-app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
