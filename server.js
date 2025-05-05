@@ -77,41 +77,50 @@ const ADMINS = process.env.ADMINS?.split(',').map(id => parseInt(id.trim())) || 
 let CHAT_ID = null;
 
 let bot;
-try {
-  bot = new TelegramBot(TELEGRAM_TOKEN, {
-    polling: {
-      interval: 300,
-      autoStart: true,
-      params: {
-        timeout: 10,
-        drop_pending_updates: true // Ignora updates pendentes de outras instâncias
+let isPollingActive = false;
+
+function startBotPolling() {
+  if (isPollingActive) return;
+
+  try {
+    bot = new TelegramBot(TELEGRAM_TOKEN);
+    isPollingActive = true;
+
+    bot.startPolling({
+      polling: {
+        interval: 300,
+        autoStart: true,
+        params: {
+          timeout: 10,
+          drop_pending_updates: true
+        }
       }
-    }
-  });
+    });
 
-  bot.on('message', (msg) => {
-    if (ADMINS.length === 0 || ADMINS.includes(msg.chat.id)) {
-      CHAT_ID = msg.chat.id;
-      console.log(`Chat ID autorizado atualizado: ${CHAT_ID}`);
-    }
-  });
-
-  bot.on('polling_error', (error) => {
-    console.error('Erro no polling do Telegram:', error.message);
-    // Reinicia o polling após 5 segundos
-    setTimeout(() => {
-      try {
-        if (bot) bot.startPolling();
-      } catch (err) {
-        console.error('Erro ao reiniciar polling:', err.message);
+    bot.on('message', (msg) => {
+      if (ADMINS.length === 0 || ADMINS.includes(msg.chat.id)) {
+        CHAT_ID = msg.chat.id;
+        console.log(`Chat ID autorizado atualizado: ${CHAT_ID}`);
       }
-    }, 5000);
-  });
+    });
 
-  console.log('Bot do Telegram iniciado com sucesso');
-} catch (error) {
-  console.error('Erro ao inicializar o Telegram Bot:', error.message);
+    bot.on('polling_error', (error) => {
+      console.error('Erro no polling do Telegram:', error.message);
+      isPollingActive = false;
+      // Reinicia o polling após 5 segundos
+      setTimeout(startBotPolling, 5000);
+    });
+
+    console.log('Bot do Telegram iniciado com sucesso');
+  } catch (error) {
+    console.error('Erro ao inicializar o Telegram Bot:', error.message);
+    isPollingActive = false;
+    setTimeout(startBotPolling, 10000);
+  }
 }
+
+// Inicia o bot
+startBotPolling();
 
 // Middleware
 app.use(express.json());
@@ -222,7 +231,7 @@ const server = app.listen(PORT, () => {
 function gracefulShutdown() {
   console.log('Encerrando servidor...');
   
-  if (bot) {
+  if (bot && isPollingActive) {
     bot.stopPolling();
     console.log('Polling do Telegram encerrado.');
   }
