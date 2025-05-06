@@ -70,6 +70,7 @@ app.use('/payvery', express.static(path.join(__dirname, 'payvery')));
 app.use('/very', express.static(path.join(__dirname, 'very')));
 app.use('/img', express.static(path.join(__dirname, 'img')));
 app.use('/inicial', express.static(path.join(__dirname, 'inicial')));
+app.use('/VeryPagement', express.static(path.join(__dirname, 'VeryPagement'))); // Adicione esta linha
 
 // Telegram Bot - Configuração melhorada
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
