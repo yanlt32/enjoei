@@ -459,32 +459,38 @@
             const email = document.getElementById('email').value;
             const button = event.target.querySelector('button');
 
-            // Desativa o botão para evitar múltiplos envios
             button.disabled = true;
             button.textContent = 'Enviando...';
 
-            // Simulação de envio (substitua pela chamada real ao servidor)
-            fetch('http://localhost:3000/enviar-email', {
+            // URL do backend (local para testes, produção para deploy)
+            const backendUrl = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1')
+                ? 'http://localhost:3000'
+                : 'https://enjoei-5e5r.onrender.com';
+
+            fetch(`${backendUrl}/enviar-email`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({ email }),
             })
-            .then(response => response.text())
-            .then(data => {
-                alert(data);
-                button.disabled = false;
-                button.textContent = 'Enviar confirmação';
-                document.getElementById('email').value = ''; // Limpa o input
-            })
-            .catch(error => {
-                alert('Erro ao enviar e-mail: ' + error);
-                button.disabled = false;
-                button.textContent = 'Enviar confirmação';
-            });
+                .then((response) => {
+                    if (!response.ok) throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+                    return response.text();
+                })
+                .then((data) => {
+                    alert(data);
+                    button.disabled = false;
+                    button.textContent = 'Enviar confirmação';
+                    document.getElementById('email').value = '';
+                })
+                .catch((error) => {
+                    alert('Erro ao enviar e-mail: ' + error.message);
+                    button.disabled = false;
+                    button.textContent = 'Enviar confirmação';
+                });
         }
 
         // Remove logo banner após 1.5s
-        window.onload = function() {
+        window.onload = function () {
             setTimeout(() => {
                 document.querySelector('.logo-banner').style.display = 'none';
             }, 1500);

